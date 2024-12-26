@@ -42,6 +42,8 @@ ssh -T git@github.com
 # 拉代码
 git clone git@github.com:kingnan-Guo/server.git
 
+git clone git@github.com:kingnan-Guo/server.git ReactorClient
+
 # 检查分支 
 git branch -r
 
