@@ -1,0 +1,3 @@
+/opt/servers/Reactor/build/CMakeFiles/Reactor.dir
+/opt/servers/Reactor/build/CMakeFiles/edit_cache.dir
+/opt/servers/Reactor/build/CMakeFiles/rebuild_cache.dir
