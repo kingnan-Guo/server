@@ -13,7 +13,6 @@
 #include <sys/fcntl.h>
 #include <sys/epoll.h>
 #include <netinet/tcp.h>      // TCP_NODELAY需要包含这个头文件。
-// #include "inetAddress.h"
 #include "tcpepoll3.h"
 #include "inetAddress.h"
 
