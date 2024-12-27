@@ -18,8 +18,8 @@ class InetAddress
     public:
         InetAddress();                                          // 构造函数
         InetAddress(const std::string &ip, uint16_t port);       // 构造函数 这里输入 
+        InetAddress(const sockaddr_in addr);
         ~InetAddress();                                         // 析构函数
-
 
         const char *ip() const;  // 获取ip地址
         uint16_t port() const;  // 获取端口号

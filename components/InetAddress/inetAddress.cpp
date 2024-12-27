@@ -11,6 +11,12 @@ InetAddress::InetAddress(const std::string &ip, uint16_t port){
 };
 
 
+// 构造函数，用于将sockaddr_in类型的地址转换为InetAddress对象, 给 addr_ 复制 addr 
+InetAddress::InetAddress(const sockaddr_in addr) : addr_(addr) {
+
+}
+
+
 
 InetAddress::~InetAddress()
 {
