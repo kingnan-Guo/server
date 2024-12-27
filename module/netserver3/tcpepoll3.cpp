@@ -15,6 +15,7 @@
 #include <netinet/tcp.h>      // TCP_NODELAY需要包含这个头文件。
 #include "tcpepoll3.h"
 #include "inetAddress.h"
+#include "socket.h"
 
 
 // 设置非阻塞的IO。
@@ -33,49 +34,16 @@ int tcpepoll3(int argc,char *argv[])
     }
 
     // 创建服务端用于监听的listenfd。
-    int listenfd = socket(AF_INET, SOCK_STREAM|SOCK_NONBLOCK, IPPROTO_TCP);// 使用 SOCK_NONBLOCK  创建 非阻塞的套接字。
-    if (listenfd < 0)
-    {
-        perror("socket() failed"); return -1;
-    }
-
-    // 设置listenfd的属性，如果对这些属性不熟悉，百度之。
-    int opt = 1; 
-    //  为监听套接字 listenfd 启用 SO_REUSEADDR 选项。 这样可以在服务器程序因异常退出后，立即重新启动绑定到同一个地址和端口，而无需等待系统释放端口。
-    setsockopt(listenfd,SOL_SOCKET,SO_REUSEADDR,&opt,static_cast<socklen_t>(sizeof opt));    // 必须的。
-    // 禁用 Nagle 算法，让数据包在调用 send() 或类似函数时立即发送，而不再延迟合并。提高了数据传输的实时性，但可能会增加小包的发送数量，从而影响网络效率。
-    setsockopt(listenfd,SOL_SOCKET,TCP_NODELAY   ,&opt,static_cast<socklen_t>(sizeof opt));    // 必须的。
-    /**
-     * 支持多进程/多线程服务器：
-     *    允许多个进程或线程绑定到同一个地址和端口。
-     *    在一个多线程服务器中，每个线程可以独立创建一个监听套接字，并监听同一个端口。
-     *      
-     * 负载均衡：
-     *      当多个进程或线程绑定到同一个端口时，内核会将新连接按照负载均衡策略分发给这些进程/线程
-     * 
-     * 解决端口占用冲突：
-     *      在默认情况下，同一个端口只能由一个套接字绑定。如果设置了 SO_REUSEPORT，多个套接字可以同时绑定到同一个端口，而不会出现 bind: Address already in use 错误。
-     * 
-     */
-    setsockopt(listenfd,SOL_SOCKET,SO_REUSEPORT ,&opt,static_cast<socklen_t>(sizeof opt));    // 有用，但是，在Reactor中意义不大。
-    /**
-     * 长连接应用：
-     *      常用于长时间保持连接的场景（如 WebSocket、REST API、数据库连接等），可以检测远程主机是否存活
-     * 
-     * 防止资源浪费：
-     *      如果对端异常断开而未通知本地应用，Keep-Alive 可以及时检测并释放相关资源。
-     * 
-     * 高可靠性场景
-     *         确保应用及时感知连接中断，以便快速重试或切换到备用连接。
-     * 
-     */
-    
-    setsockopt(listenfd, SOL_SOCKET, SO_KEEPALIVE, &opt, static_cast<socklen_t> (sizeof opt));    // 可能有用，但是，建议自己做心跳。
-
-    // setnonblocking3(listenfd);    // 把服务端的listenfd设置为非阻塞的。
+    // int listenfd = socket(AF_INET, SOCK_STREAM|SOCK_NONBLOCK, IPPROTO_TCP);// 使用 SOCK_NONBLOCK  创建 非阻塞的套接字。
+    // if (listenfd < 0)
+    // {
+    //     perror("socket() failed"); return -1;
+    // }
 
 
+    Socket serverScoket(createnonblocking());
 
+    int listenfd = serverScoket.fd();
 
     // struct sockaddr_in servaddr;                                  // 服务端地址的结构体。
     // servaddr.sin_family = AF_INET;                              // IPv4网络协议的套接字类型。
@@ -86,20 +54,15 @@ int tcpepoll3(int argc,char *argv[])
     // InetAddress servaddr = InetAddress (argv[1], atoi(argv[2]));
     InetAddress servaddr(argv[1], atoi(argv[2]));
 
-    // if (bind(listenfd,(struct sockaddr *) &servaddr, sizeof(servaddr)) < 0 )
-    if (bind(listenfd, servaddr.addr(), sizeof(servaddr)) < 0 )
-    {
-        perror("bind() failed"); 
-        close(listenfd); 
-        return -1;
-    }
+    serverScoket.setreuseaddr(true);
+    serverScoket.settcpnodelay(true);
+    serverScoket.setreuseport(true);
+    serverScoket.setkeepalive(true);
 
-    if (listen(listenfd, 128) != 0 )        // 在高并发的网络服务器中，第二个参数要大一些。
-    {
-        perror("listen() failed"); 
-        close(listenfd); 
-        return -1;
-    }
+    serverScoket.bind(servaddr);
+    serverScoket.listen();
+
+    
 
     int epollfd = epoll_create(1);        // 创建epoll句柄（红黑树）。
 
@@ -151,20 +114,20 @@ int tcpepoll3(int argc,char *argv[])
 
 
                         ////////////////////////////////////////////////////////////////////////
-                        struct sockaddr_in peeraddr;
-                        socklen_t len = sizeof(peeraddr);
-                        int clientfd = accept4(listenfd, (struct sockaddr*) &peeraddr, &len, SOCK_NONBLOCK);
-                        // setnonblocking3(clientfd);         // 客户端连接的fd必须设置为非阻塞的。
+    
 
-                        InetAddress clientaddr(peeraddr);
+                        InetAddress clientaddr;             // 客户端的地址和协议。
 
+                        Socket *clientSock = new Socket(serverScoket.accept(clientaddr));
 
-                        printf ("accept client(fd=%d, ip=%s, port=%d ) ok.\n", clientfd, clientaddr.ip(), clientaddr.port());
+ 
+
+                        printf ("accept client(fd=%d, ip=%s, port=%d ) ok.\n", clientSock->fd(), clientaddr.ip(), clientaddr.port());
 
                         // 为新客户端连接准备读事件，并添加到epoll中。
-                        ev.data.fd = clientfd;
+                        ev.data.fd = clientSock->fd();
                         ev.events = EPOLLIN | EPOLLET;           // 边缘触发。
-                        epoll_ctl(epollfd, EPOLL_CTL_ADD, clientfd, &ev);
+                        epoll_ctl(epollfd, EPOLL_CTL_ADD, clientSock->fd(), &ev);
                         ////////////////////////////////////////////////////////////////////////
 
 

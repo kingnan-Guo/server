@@ -25,6 +25,12 @@ Socket::~Socket() {
 }
 
 
+int Socket::fd() const                              // 返回fd_成员。
+{
+    return fd_;
+}
+
+
 void Socket::setreuseaddr(bool on){
     int optval = on ? 1 : 0;
     //  为监听套接字 listenfd 启用 SO_REUSEADDR 选项。 这样可以在服务器程序因异常退出后，立即重新启动绑定到同一个地址和端口，而无需等待系统释放端口。
@@ -76,3 +82,37 @@ void Socket::setkeepalive(bool on){
 
 
 
+
+
+void Socket::bind(const InetAddress &servaddr){
+    if (::bind(fd_, servaddr.addr(), sizeof(servaddr)) < 0 )
+    {
+        perror("bind() failed");
+        close(fd_);
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+
+
+void Socket::listen(int byte){
+    if (::listen(fd_, byte) != 0 )        // 在高并发的网络服务器中，第二个参数要大一些。
+    {
+        perror("listen() failed"); 
+        close(fd_); 
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+
+int Socket::accept(InetAddress& clientaddr){
+    struct sockaddr_in peeraddr;
+    socklen_t len = sizeof(peeraddr);
+    int clientfd = ::accept4(fd_, (struct sockaddr*) &peeraddr, &len, SOCK_NONBLOCK);
+
+    clientaddr.setaddr(peeraddr);
+
+    return clientfd;
+}

@@ -45,3 +45,8 @@ const sockaddr * InetAddress::addr() const{
 
 
 
+void InetAddress::setaddr (const sockaddr_in clientaddr){
+    addr_ = clientaddr;
+};
+
+
