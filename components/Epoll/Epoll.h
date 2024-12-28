@@ -8,6 +8,11 @@
 #include <vector>
 #include <unistd.h>
 
+#include "Channel.h"
+
+class Channel;
+
+
 class Epoll
 {
     private:
@@ -21,7 +26,13 @@ class Epoll
 
         void addFd(int epollfd, uint32_t opt); // 添加文件描述符到epoll中
 
-        // 在这个函数中增加 成员函数 ，在这个函数中 运行 epoll_wait， 等待事件的发生, 已经发生的事件 用 vector 返回
+        // 把 channel 添加 或 更新到 红黑树上， Channel 中有哦 fd ， 也需要监视的事件
+        void updateChannel(Channel* ch); // 更新文件描述符的事件
 
-        std::vector<epoll_event> loop(int timeout = -1);
+
+
+        // 在这个函数中增加 成员函数 ，在这个函数中 运行 epoll_wait， 等待事件的发生, 已经发生的事件 用 vector 返回
+        // std::vector<epoll_event> loop(int timeout = -1);
+        std::vector<Channel*> loop(int timeout = -1);
+        
 };

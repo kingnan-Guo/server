@@ -1,6 +1,37 @@
 # 更新进度
+
 2024/12/28   21: 47
 添加 epoll类 ： Reactor_05_add_epoll_class
+
+2024/12/28   23: 43
+channel 登场 ： Reactor_06_add_channel_1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # server

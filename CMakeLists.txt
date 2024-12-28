@@ -12,7 +12,8 @@ include_directories(
     # 组件 ===========
     components/InetAddress   #  地址
     components/Socket        # 套接字
-    components/Epoll        # epoll
+    components/Epoll        # epoll 封装
+    components/Channel     # channel 类
 
     # 网络相关 =========
     module/netserver # 线程
