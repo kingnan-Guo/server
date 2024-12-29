@@ -2,6 +2,9 @@
  * 程序名：tcpepoll.cpp，此程序用于演示采用epoll模型实现网络通讯的服务端。
  * 作者：吴从周
 */
+
+
+
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -13,12 +16,14 @@
 #include <sys/fcntl.h>
 #include <sys/epoll.h>
 #include <netinet/tcp.h>      // TCP_NODELAY需要包含这个头文件。
-#include "tcpepoll3.h"
+
 #include "inetAddress.h"
 #include "socket.h"
 #include "Epoll.h"
 
 #include "EventLoop.h"
+#include "tcpepoll3.h"
+// #include "TcpServer.h"
 
 int tcpepoll3(int argc,char *argv[])
 {
@@ -31,10 +36,9 @@ int tcpepoll3(int argc,char *argv[])
     
 
 
+
     Socket serverScoket(createnonblocking());
 
-    // 创建服务端用于监听的listenfd。
-    int listenfd = serverScoket.fd();
 
     // struct sockaddr_in servaddr;                                  // 服务端地址的结构体。
     // servaddr.sin_family = AF_INET;                              // IPv4网络协议的套接字类型。
@@ -56,6 +60,10 @@ int tcpepoll3(int argc,char *argv[])
     
 
 
+    // 创建服务端用于监听的listenfd。
+    int listenfd = serverScoket.fd();
+
+
     // // 创建epoll句柄（红黑树）。
     // Epoll ep;
     
@@ -63,20 +71,20 @@ int tcpepoll3(int argc,char *argv[])
     // Channel* servChannel = new Channel(&ep, listenfd);
 
     EventLoop eLoop;
-    Channel* servChannel = new Channel(eLoop.ep(), listenfd);
-
+    // Channel* servChannel = new Channel(eLoop.ep(), listenfd);// 这里new出来的对象没有释放，这个问题以后再解决。
+    Channel* servChannel = new Channel(&eLoop, listenfd);
 
 
     // 指定回调函数 
     servChannel->setReadCallback(
-        /**
-         * 回调函数，当有新的客户端连接时，此函数会被调用。
-         * @param &Channel::newConnection       Channel对象中的成员函数。
-         * @param servChannel                   服务端用于监听的Channel对象。
-         *  @param &serverScoket                newConnection 的传值参数。
-         * 
-         * 
-         */
+        // 
+        // 回调函数，当有新的客户端连接时，此函数会被调用。
+        // @param &Channel::newConnection       Channel对象中的成员函数。
+        // @param servChannel                   服务端用于监听的Channel对象。
+        //  @param &serverScoket                newConnection 的传值参数。
+        // 
+        // 
+        // 
         std::bind(&Channel::newConnection, servChannel, &serverScoket) // 绑定函数
     );
 
@@ -99,6 +107,8 @@ int tcpepoll3(int argc,char *argv[])
     // }
 
     eLoop.run();
+
+
 
   return 0;
 }

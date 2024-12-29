@@ -56,8 +56,19 @@ void EventLoop::run(){
         {
 
 
-            ch->handleEvent();
+            ch->handleEvent();// 处理epoll_wait()返回的事件。
 
         }
     }
+}
+
+
+
+
+
+
+// 把channel添加/更新到红黑树上，channel中有fd，也有需要监视的事件。
+void EventLoop::updateChannel(Channel *ch)                        
+{
+    ep_->updateChannel(ch);
 }

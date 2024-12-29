@@ -5,7 +5,11 @@
 // Channel::Channel(Epoll* ep, int fd, bool isListen): ep_(ep), fd_(fd), isListen_(isListen){
 
 // }
-Channel::Channel(Epoll* ep, int fd): ep_(ep), fd_(fd){
+// Channel::Channel(Epoll* ep, int fd): ep_(ep), fd_(fd){
+
+// }
+
+Channel::Channel(EventLoop* loop, int fd): loop_(loop), fd_(fd){
 
 }
 
@@ -33,7 +37,8 @@ void Channel::enableReading(){
     // 要监听 读事件
     events_ =  events_ | EPOLLIN;
     // 调用 Epoll 类中的  updateChannel 。epoll_ctl() 将 fd 加入到 epoll 中
-     ep_->updateChannel(this);
+    //  ep_->updateChannel(this);
+    loop_->updateChannel(this);
     
 }; 
 
@@ -115,8 +120,10 @@ void Channel::newConnection(Socket * serverScoket){
 
     printf ("accept client(fd=%d, ip=%s, port=%d ) ok.\n", clientSock->fd(), clientaddr.ip(), clientaddr.port());
 
-    // 创建Channel对象，并添加到epoll中。
-    Channel* clientChannel = new Channel(ep_, clientSock->fd());
+    // // 创建Channel对象，并添加到epoll中。
+    // Channel* clientChannel = new Channel(ep_, clientSock->fd());
+    Channel* clientChannel = new Channel(loop_, clientSock->fd());
+
 
     clientChannel->setReadCallback(
         std::bind(&Channel::onMessage, clientChannel)
