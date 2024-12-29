@@ -5,24 +5,24 @@
 
 
 
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <sys/socket.h>
-#include <sys/types.h>          
-#include <arpa/inet.h>
-#include <sys/fcntl.h>
-#include <sys/epoll.h>
-#include <netinet/tcp.h>      // TCP_NODELAY需要包含这个头文件。
+// #include <stdio.h>
+// #include <unistd.h>
+// #include <stdlib.h>
+// #include <string.h>
+// #include <errno.h>
+// #include <sys/socket.h>
+// #include <sys/types.h>          
+// #include <arpa/inet.h>
+// #include <sys/fcntl.h>
+// #include <sys/epoll.h>
+// #include <netinet/tcp.h>      // TCP_NODELAY需要包含这个头文件。
 
-#include "inetAddress.h"
-#include "socket.h"
-#include "Epoll.h"
+// #include "inetAddress.h"
+// #include "socket.h"
+// #include "Epoll.h"
 
-#include "EventLoop.h"
-#include "tcpepoll3.h"
+// #include "EventLoop.h"
+// #include "tcpepoll3.h"
 #include "TcpServer.h"
 
 int tcpepoll3(int argc,char *argv[])
