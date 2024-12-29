@@ -16,9 +16,6 @@ class Channel {
         uint32_t events_ = 0; // fd 需要监视的事件， listenfd 和 clientdf 需要监视 EPOLLION ， clientdf 需要监视  EPOLLOUT
         uint32_t revents_ = 0; // fd  已经发生的事件
 
-        
-        //bool isListen_ = false;// 添加成员变量 判断是 listenfd 还是 
-
 
         // 添加 回调函数的 成员变量 =====
         // 函数的类型是 void() 参数为 空 
