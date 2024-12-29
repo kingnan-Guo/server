@@ -23,7 +23,7 @@
 
 #include "EventLoop.h"
 #include "tcpepoll3.h"
-// #include "TcpServer.h"
+#include "TcpServer.h"
 
 int tcpepoll3(int argc,char *argv[])
 {
@@ -37,6 +37,7 @@ int tcpepoll3(int argc,char *argv[])
 
 
 
+/*********************************
     Socket serverScoket(createnonblocking());
 
 
@@ -108,7 +109,12 @@ int tcpepoll3(int argc,char *argv[])
 
     eLoop.run();
 
+*********************************
+*/
 
+    TcpServer tcpserver(argv[1],atoi(argv[2]));
+
+    tcpserver.start();      
 
   return 0;
 }

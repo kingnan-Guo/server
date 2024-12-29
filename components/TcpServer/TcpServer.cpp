@@ -20,34 +20,6 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port){
     //---------------
 
 
-    // // 创建服务端用于监听的listenfd。
-    // int listenfd = serverScoket->fd();
-
-    // // // 创建epoll句柄（红黑树）。
-    // // Epoll ep;
-    
-    // // // 让epoll监视listenfd的读事件，采用水平触发。
-    // // Channel* servChannel = new Channel(&ep, listenfd);
-
-    // // EventLoop eLoop;
-    // Channel* servChannel = new Channel(&loop_, listenfd);// 这里new出来的对象没有释放，这个问题以后再解决。
-
-    // // 指定回调函数 
-    // servChannel->setReadCallback(
-    //     /**
-    //      * 回调函数，当有新的客户端连接时，此函数会被调用。
-    //      * @param &Channel::newConnection       Channel对象中的成员函数。
-    //      * @param servChannel                   服务端用于监听的Channel对象。
-    //      *  @param &serverScoket                newConnection 的传值参数。
-    //      * 
-    //      */
-    //     std::bind(&Channel::newConnection, servChannel, &serverScoket) // 绑定函数
-    // );
-
-    // // 启用 读事件
-    // servChannel->enableReading();
-
-
     // 创建服务端用于监听的listenfd。
     int listenfd = serverScoket->fd();
 
@@ -58,9 +30,9 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port){
     // // 让epoll监视listenfd的读事件，采用水平触发。
     // Channel* servChannel = new Channel(&ep, listenfd);
 
-    EventLoop eLoop;
+    // EventLoop eLoop;
     // Channel* servChannel = new Channel(eLoop.ep(), listenfd);// 这里new出来的对象没有释放，这个问题以后再解决。
-    Channel* servChannel = new Channel(&eLoop, listenfd);
+    Channel* servChannel = new Channel(&loop_, listenfd);
 
 
     // 指定回调函数 
@@ -78,7 +50,6 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port){
 
     // 启用 读事件
     servChannel->enableReading();
-
 
 
 
