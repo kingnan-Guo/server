@@ -18,11 +18,7 @@
 #include "socket.h"
 #include "Epoll.h"
 
-// 设置非阻塞的IO。
-// void setnonblocking3(int fd)
-// {
-//     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
-// }
+
 
 int tcpepoll3(int argc,char *argv[])
 {
@@ -63,46 +59,29 @@ int tcpepoll3(int argc,char *argv[])
     // 创建epoll句柄（红黑树）。
     Epoll ep;
     // 让epoll监视listenfd的读事件，采用水平触发。
-    // ep.addFd(listenfd, EPOLLIN);
 
-    Channel* servChannel = new Channel(&ep, listenfd);
+
+    Channel* servChannel = new Channel(&ep, listenfd, true);
     // 启用 读事件
     servChannel->enableReading();
 
- 
-    // std::vector<epoll_event> evs; // 存放epoll_wait()返回事件的数组。
+
 
     while (true)        // 事件循环。
     {
-         /*
-        int infds = epoll_wait(epollfd, evs, 10, -1);       // 等待监视的fd有事件发生。
 
-        // 返回失败。
-        if (infds < 0)
-        {
-            perror("epoll_wait() failed"); break;
-        }
-
-        // 超时。
-        if (infds == 0)
-        {
-            printf("epoll_wait() timeout.\n"); continue;
-        }
-         */
         
         std::vector<Channel *> channels; // 存放epoll_wait()返回事件的数组。
         //  
         channels = ep.loop();
 
 
-        // 如果infds>0，表示有事件发生的fd的数量。
-        //for (int ii = 0; ii < infds; ii++)       // 遍历epoll返回的数组evs。
-        
+
         // 遍历容器 
         for(auto &ch:channels)
         {
-                   
-            
+             ch->handleEvent(&serverScoket);
+            /*
             {
                 // 如果是客户端连接的fd有事件。
                 ////////////////////////////////////////////////////////////////////////
@@ -133,17 +112,7 @@ int tcpepoll3(int argc,char *argv[])
                         printf ("accept client(fd=%d, ip=%s, port=%d ) ok.\n", clientSock->fd(), clientaddr.ip(), clientaddr.port());
 
 
-                        /*
-                        // 为新客户端连接准备读事件，并添加到epoll中。
-                        ch->fd() = clientSock->fd();
-                        ch->events() = EPOLLIN | EPOLLET;           // 边缘触发。
-                        epoll_ctl(epollfd, EPOLL_CTL_ADD, clientSock->fd(), &ev);
-                      
-                        */
 
-
-                        // 为新客户端连接准备读事件，并添加到epoll中。
-                       // ep.addFd(clientSock->fd(), EPOLLIN | EPOLLET);           // 边缘触发。
                     
                         // 创建Channel对象，并添加到epoll中。
                         Channel* clientChannel = new Channel(&ep, clientSock->fd());
@@ -202,6 +171,8 @@ int tcpepoll3(int argc,char *argv[])
                 ////////////////////////////////////////////////////////////////////////
 
             }
+
+            */
 
 
         }

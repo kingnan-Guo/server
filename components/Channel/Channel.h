@@ -1,7 +1,8 @@
 #pragma once
 #include <sys/epoll.h>
 #include "Epoll.h"
-
+#include "inetAddress.h"
+#include "socket.h"
 
 class Epoll; // Epoll.h 中没有包含 Channel.h ，所以这里需要前置声明
 
@@ -12,8 +13,11 @@ class Channel {
         bool inEpoll_ = false; // channel 是否在 epoll 中, 如果 未添加 调用 epoll_ctl() 的时候用 EPOLL_CTL_ADD 添加，否则 EPOLL_CLT_MOD 修改
         uint32_t events_ = 0; // fd 需要监视的事件， listenfd 和 clientdf 需要监视 EPOLLION ， clientdf 需要监视  EPOLLOUT
         uint32_t revents_ = 0; // fd  已经发生的事件
+
+        // 添加成员变量 判断是 listenfd 还是 
+        bool isListen_ = false;
     public:
-        Channel(Epoll* ep, int fd); // 构造函数
+        Channel(Epoll* ep, int fd, bool isListen = false); // 构造函数
         ~Channel();                    //   析构函数
 
         int fd(); // 返回 fd
@@ -31,6 +35,9 @@ class Channel {
         void setRevents(uint32_t revents); // 设置 revents_ 为 revents
         uint32_t revents(); // 返回 revents_
 
+
+        // 事件处理函数 ， epoll_wait() 返回的时候， 执行它
+        void handleEvent(Socket * serverScoket);
 };
 
 
