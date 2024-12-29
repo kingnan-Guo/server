@@ -61,7 +61,21 @@ int tcpepoll3(int argc,char *argv[])
     // 让epoll监视listenfd的读事件，采用水平触发。
 
 
-    Channel* servChannel = new Channel(&ep, listenfd, true);
+    Channel* servChannel = new Channel(&ep, listenfd);
+
+    // 指定回调函数 
+    servChannel->setReadCallback(
+        /**
+         * 回调函数，当有新的客户端连接时，此函数会被调用。
+         * @param &Channel::newConnection       Channel对象中的成员函数。
+         * @param servChannel                   服务端用于监听的Channel对象。
+         *  @param &serverScoket                newConnection 的传值参数。
+         * 
+         * 
+         */
+        std::bind(&Channel::newConnection, servChannel, &serverScoket) // 绑定函数
+    );
+
     // 启用 读事件
     servChannel->enableReading();
 
@@ -80,7 +94,7 @@ int tcpepoll3(int argc,char *argv[])
         // 遍历容器 
         for(auto &ch:channels)
         {
-             ch->handleEvent(&serverScoket);
+             
             /*
             {
                 // 如果是客户端连接的fd有事件。
@@ -174,6 +188,9 @@ int tcpepoll3(int argc,char *argv[])
 
             */
 
+
+           //ch->handleEvent(&serverScoket);
+            ch->handleEvent();
 
         }
     }

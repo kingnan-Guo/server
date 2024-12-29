@@ -4,6 +4,8 @@
 #include "inetAddress.h"
 #include "socket.h"
 
+#include <functional>
+
 class Epoll; // Epoll.h 中没有包含 Channel.h ，所以这里需要前置声明
 
 class Channel {
@@ -14,10 +16,15 @@ class Channel {
         uint32_t events_ = 0; // fd 需要监视的事件， listenfd 和 clientdf 需要监视 EPOLLION ， clientdf 需要监视  EPOLLOUT
         uint32_t revents_ = 0; // fd  已经发生的事件
 
-        // 添加成员变量 判断是 listenfd 还是 
-        bool isListen_ = false;
+        
+        //bool isListen_ = false;// 添加成员变量 判断是 listenfd 还是 
+
+
+        // 添加 回调函数的 成员变量 =====
+        // 函数的类型是 void() 参数为 空 
+        std::function<void()> readCallback_; // fd_ 读事件 的。回调函数
     public:
-        Channel(Epoll* ep, int fd, bool isListen = false); // 构造函数
+        Channel(Epoll* ep, int fd); // 构造函数
         ~Channel();                    //   析构函数
 
         int fd(); // 返回 fd
@@ -36,8 +43,17 @@ class Channel {
         uint32_t revents(); // 返回 revents_
 
 
-        // 事件处理函数 ， epoll_wait() 返回的时候， 执行它
-        void handleEvent(Socket * serverScoket);
+        // 事件处理函数 ， epoll_wait() 返回的时候， 执行它 =====
+        void handleEvent();
+
+
+        // 将 客户端连上来 和  连接的客户端的fd有事件 封装成 回调函数 ===== 
+        void newConnection(Socket * serverSocket); // 处理新客户端连接请求
+        void onMessage();                           // 处理 对端 发送过来的消息
+
+        void setReadCallback(std::function<void()> readCallback); // 设置  回调函数的成员函数。readCallback_
+
+
 };
 
 
