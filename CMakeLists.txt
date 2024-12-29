@@ -14,6 +14,9 @@ include_directories(
     components/Socket        # 套接字
     components/Epoll        # epoll 封装
     components/Channel     # channel 类
+    components/EventLoop    # 事件循环 EventLoop 类
+
+    
 
     # 网络相关 =========
     module/netserver # 线程

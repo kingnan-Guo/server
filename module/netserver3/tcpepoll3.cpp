@@ -18,7 +18,7 @@
 #include "socket.h"
 #include "Epoll.h"
 
-
+#include "EventLoop.h"
 
 int tcpepoll3(int argc,char *argv[])
 {
@@ -56,12 +56,16 @@ int tcpepoll3(int argc,char *argv[])
     
 
 
-    // 创建epoll句柄（红黑树）。
-    Epoll ep;
-    // 让epoll监视listenfd的读事件，采用水平触发。
+    // // 创建epoll句柄（红黑树）。
+    // Epoll ep;
+    
+    // // 让epoll监视listenfd的读事件，采用水平触发。
+    // Channel* servChannel = new Channel(&ep, listenfd);
+
+    EventLoop eLoop;
+    Channel* servChannel = new Channel(eLoop.ep(), listenfd);
 
 
-    Channel* servChannel = new Channel(&ep, listenfd);
 
     // 指定回调函数 
     servChannel->setReadCallback(
@@ -81,25 +85,20 @@ int tcpepoll3(int argc,char *argv[])
 
 
 
-    while (true)        // 事件循环。
-    {
+    // while (true)        // 事件循环。
+    // {
+    //     std::vector<Channel *> channels; // 存放epoll_wait()返回事件的数组。
+    //     //  
+    //     channels = ep.loop();
 
-        
-        std::vector<Channel *> channels; // 存放epoll_wait()返回事件的数组。
-        //  
-        channels = ep.loop();
+    //     // 遍历容器 
+    //     for(auto &ch:channels)
+    //     {
+    //         ch->handleEvent();
+    //     }
+    // }
 
-
-
-        // 遍历容器 
-        for(auto &ch:channels)
-        {
-
-
-            ch->handleEvent();
-
-        }
-    }
+    eLoop.run();
 
   return 0;
 }
