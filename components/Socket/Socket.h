@@ -5,7 +5,7 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
-#include "inetAddress.h"
+#include "InetAddress.h"
 
 
 int createnonblocking();

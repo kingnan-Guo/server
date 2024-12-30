@@ -1,8 +1,8 @@
 #pragma once
 #include <sys/epoll.h>
 #include <functional>
-#include "inetAddress.h"
-#include "socket.h"
+#include "InetAddress.h"
+#include "Socket.h"
 #include "EventLoop.h"
 
 

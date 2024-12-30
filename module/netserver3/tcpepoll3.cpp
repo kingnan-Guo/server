@@ -17,8 +17,8 @@
 // #include <sys/epoll.h>
 // #include <netinet/tcp.h>      // TCP_NODELAY需要包含这个头文件。
 
-// #include "inetAddress.h"
-// #include "socket.h"
+// #include "InetAddress.h"
+// #include "Socket.h"
 // #include "Epoll.h"
 
 // #include "EventLoop.h"
