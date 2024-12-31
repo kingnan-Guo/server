@@ -3,7 +3,7 @@
 
 TcpServer::TcpServer(const std::string &ip, const uint16_t port){
 
-
+    /*
     // Socket serverScoket(createnonblocking()); 不能使用这个 ，因为 离开 TcpServer 后 会调用  ~Socket() ，会关闭fd，导致epoll监听失败。 所以使用下面的 
     Socket * serverScoket = new Socket(createnonblocking()); // 
 
@@ -51,13 +51,18 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port){
     // 启用 读事件
     servChannel->enableReading();
 
+    */
+
+   acceptor_ = new Acceptor(&loop_, ip, port);
+
+
 
 
 };
 
 
 TcpServer::~TcpServer(){
-
+    delete acceptor_;
 };
 
 // 运行时间循环
