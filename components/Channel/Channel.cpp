@@ -120,6 +120,8 @@ void Channel::newConnection(Socket * serverScoket){
 
     printf ("accept client(fd=%d, ip=%s, port=%d ) ok.\n", clientSock->fd(), clientaddr.ip(), clientaddr.port());
 
+
+    /*
     // // 创建Channel对象，并添加到epoll中。
     // Channel* clientChannel = new Channel(ep_, clientSock->fd());
     Channel* clientChannel = new Channel(loop_, clientSock->fd());
@@ -132,6 +134,11 @@ void Channel::newConnection(Socket * serverScoket){
     // 客户端采用边缘触发
     clientChannel->useEt();
     clientChannel->enableReading();
+
+    */
+
+   // 创建Connection对象，并添加到epoll中。
+   Connection* connection = new Connection(loop_, clientSock);
 
 }; 
 

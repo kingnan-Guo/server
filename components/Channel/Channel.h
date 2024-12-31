@@ -4,7 +4,7 @@
 #include "InetAddress.h"
 #include "Socket.h"
 #include "EventLoop.h"
-
+#include "Connection.h"
 
 class Epoll; // Epoll.h 中没有包含 Channel.h ，所以这里需要前置声明
 class EventLoop; // EventLoop.h 中没有包含 Channel.h ，所以这里需要前置声明

@@ -33,6 +33,10 @@ Acceptor 类： Reactor_12_add_Acceptor_class
     把 TcpServer 中 创建的 链接 封装为 Acceptor
 
 
+2024/12/31   14: 55
+Connection 类： Reactor_13_add_Connection_class
+     封装 Connection 放到  Channel 中 替换 ： 为新客户端连接准备读事件
+
 
 
 
