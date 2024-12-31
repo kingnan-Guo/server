@@ -110,9 +110,20 @@ void Acceptor::newConnection(){
    
 
    // 创建Connection对象，并添加到epoll中。
-   Connection* connection = new Connection(loop_, clientSock);
+   // Connection* connection = new Connection(loop_, clientSock);
+
+    // 回调TcpServer::newconnection() ,替换 上面 两行
+    newConnectionCallback_(clientSock);
+
 
 }; 
+
+
+
+ // 设置处理新客户端 连接请求的。回调函数，
+void Acceptor::setNewConnectionCallback(std::function<void(Socket*)> callback){
+    newConnectionCallback_ = callback;
+}
 
 
 

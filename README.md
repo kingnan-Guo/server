@@ -45,6 +45,15 @@ Connection 类： Reactor_13_add_Connection_class
 
 
 
+2024/12/31   22: 00
+优化 Acceptor ： Reactor_15_Optimize_Accept_2
+     8-7 在 Acceptor 类中回调TcpServer类的成员函数，
+        在 TcpServer 中 创建 Connection 对象，使用 回调函数的方式去实现
+        // Acceptor 增加一个 成员函数 用于 回调函数 ，  设置处理新客户端 连接请求的。回调函数， 回调函数的参数是 Socket* ， 也就是 新连接的客户端的 fd， 
+        // 在 TcpServer 中 创建 Connection 对象，使用 回调函数的方式去实现， 在 TcpServer 的 构造函数中 设置 回调函数， 设置 回调函数  acceptor_->setNewConnectionCallback
+
+
+
 
 
 

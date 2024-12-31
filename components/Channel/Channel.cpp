@@ -112,8 +112,9 @@ void Channel::handleEvent(){
 
 
 //==========================    =========================================
-// 此处 修改到 Connection 类中
+/*
 
+// 此处 修改到 Connection 类中
 
 #include "Connection.h"
 // 将 客户端连上来 和  连接的客户端的fd有事件 封装成 回调函数
@@ -144,6 +145,7 @@ void Channel::newConnection(Socket * serverScoket){
    Connection* connection = new Connection(loop_, clientSock);
 
 }; 
+*/
 
 // 处理 对端 发送过来的消息
 void Channel::onMessage(){

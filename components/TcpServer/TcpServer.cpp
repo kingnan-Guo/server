@@ -55,7 +55,15 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port){
 
    acceptor_ = new Acceptor(&loop_, ip, port);
 
-
+    // 设置 回调函数
+    acceptor_->setNewConnectionCallback(
+        // std::placeholders::_1 
+        // 回调函数，当有新的客户端连接时，此函数会被调用。
+        // @param &TcpServer::newConnection       TcpServer对象中的成员函数。
+        // @param this                             TcpServer对象。
+        // @param std::placeholders::_1            当前无法传输这个值，所以 站位      
+        std::bind(&TcpServer::newConnection, this, std::placeholders::_1)
+    );
 
 
 };
@@ -65,7 +73,20 @@ TcpServer::~TcpServer(){
     delete acceptor_;
 };
 
-// 运行时间循环
+// 运行时间循环 
 void TcpServer::start(){
     loop_.run();
 };
+
+
+
+
+
+// ==========
+
+// 处理 客户端的连接请求
+void TcpServer::newConnection(Socket* clinetSocket){
+    // printf ("accept client(fd=%d,ip=%s,port=%d) ok.\n",clinetSocket->fd(),clientaddr.ip(),clientaddr.port());
+    Connection* connection = new Connection(&loop_, clinetSocket); // 这里new 出的对象没有释放
+}
+

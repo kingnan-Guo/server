@@ -7,6 +7,8 @@
 #include "EventLoop.h"
 #include "Acceptor.h"
 
+#include "Connection.h"
+
 // 网络服务类 
 class TcpServer{
     private:
@@ -19,4 +21,5 @@ class TcpServer{
 
         // 运行时间循环
         void start();
+        void newConnection(Socket* clinetSocket);
 };
