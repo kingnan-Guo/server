@@ -1,5 +1,5 @@
 #include "Channel.h"
-
+#include "Connection.h"
 
 
 // Channel::Channel(Epoll* ep, int fd, bool isListen): ep_(ep), fd_(fd), isListen_(isListen){
