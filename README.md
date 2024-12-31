@@ -38,7 +38,10 @@ Connection 类： Reactor_13_add_Connection_class
      封装 Connection 放到  Channel 中 替换 ： 为新客户端连接准备读事件
 
 
-
+2024/12/31   21: 57
+优化 Acceptor ： Reactor_14_Optimize_Accept_1
+     优化 Acceptor , 把 Channel 的 newConnection 回调函数 放到 Acceptor 中， 老师大概的意思是 因为， 在 Acceptor 中  创建服务端用于监听的listenfd。
+                     在传统的网络服务 链接中 由 监听的 fd 产生 客户端 连接的 fd ； Acceptor 封装了监听的fd 监听的 Channel， Connection类的对象由 Acceptor 类 创建， 也就是说 创建。Connection的代码应该 写在 Acceptor 类中， 而不是在 TcpServer 中。
 
 
 

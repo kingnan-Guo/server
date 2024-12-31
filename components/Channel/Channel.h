@@ -24,7 +24,7 @@ class Channel {
         std::function<void()> readCallback_; // fd_ 读事件 的。回调函数
     public:
         // Channel(Epoll* ep, int fd); // 构造函数
-        Channel(EventLoop* eLoop, int fd); // 构造函数
+        Channel(EventLoop* eLoop, int fd); // 构造函数；    Channel 是 Acceptor 和 Connection 的 下层类 ； 
         ~Channel();                    //   析构函数
 
         int fd(); // 返回 fd
@@ -48,7 +48,7 @@ class Channel {
 
 
         // 将 客户端连上来 和  连接的客户端的fd有事件 封装成 回调函数 ===== 
-        void newConnection(Socket * serverSocket); // 处理新客户端连接请求
+        void newConnection(Socket * serverSocket); // 处理新客户端连接请求 ，修改到 Acceptor 类中
         void onMessage();                           // 处理 对端 发送过来的消息
 
         void setReadCallback(std::function<void()> readCallback); // 设置  回调函数的成员函数。readCallback_

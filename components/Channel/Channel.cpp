@@ -1,5 +1,5 @@
 #include "Channel.h"
-#include "Connection.h"
+
 
 
 // Channel::Channel(Epoll* ep, int fd, bool isListen): ep_(ep), fd_(fd), isListen_(isListen){
@@ -112,6 +112,10 @@ void Channel::handleEvent(){
 
 
 //==========================    =========================================
+// 此处 修改到 Connection 类中
+
+
+#include "Connection.h"
 // 将 客户端连上来 和  连接的客户端的fd有事件 封装成 回调函数
 // 处理新客户端连接请求
 void Channel::newConnection(Socket * serverScoket){
@@ -120,28 +124,26 @@ void Channel::newConnection(Socket * serverScoket){
 
     printf ("accept client(fd=%d, ip=%s, port=%d ) ok.\n", clientSock->fd(), clientaddr.ip(), clientaddr.port());
 
+    //////////////////////////////////////////////////////////////////////
+    // // // 创建Channel对象，并添加到epoll中。
+    // // Channel* clientChannel = new Channel(ep_, clientSock->fd());
+    // Channel* clientChannel = new Channel(loop_, clientSock->fd());
 
-    /*
-    // // 创建Channel对象，并添加到epoll中。
-    // Channel* clientChannel = new Channel(ep_, clientSock->fd());
-    Channel* clientChannel = new Channel(loop_, clientSock->fd());
 
+    // clientChannel->setReadCallback(
+    //     std::bind(&Channel::onMessage, clientChannel)
+    // );
 
-    clientChannel->setReadCallback(
-        std::bind(&Channel::onMessage, clientChannel)
-    );
+    // // 客户端采用边缘触发
+    // clientChannel->useEt();
+    // clientChannel->enableReading();
+    //////////////////////////////////////////////////////////////////////
 
-    // 客户端采用边缘触发
-    clientChannel->useEt();
-    clientChannel->enableReading();
-
-    */
 
    // 创建Connection对象，并添加到epoll中。
    Connection* connection = new Connection(loop_, clientSock);
 
 }; 
-
 
 // 处理 对端 发送过来的消息
 void Channel::onMessage(){
