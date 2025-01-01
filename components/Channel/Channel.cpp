@@ -79,8 +79,18 @@ void Channel::handleEvent(){
         ////////////////////////////////////////////////////////////////////////
         if (revents_ & EPOLLRDHUP)                     // 对方已关闭，有些系统检测不到，可以使用EPOLLIN，recv()返回0。
         {
+            /*
             printf("1client(eventfd=%d) disconnected.\n", fd_);
             close(fd_);            // 关闭客户端的fd。
+            
+            */
+           closeCallBack_();
+
+
+
+
+
+
         }                                //  普通数据  带外数据
 
         else if (revents_ & (EPOLLIN | EPOLLPRI))   // 接收缓冲区中有数据可以读。
@@ -98,8 +108,18 @@ void Channel::handleEvent(){
 
         else                                                                    // 其它事件，都视为错误。
         {
+            /*
             printf("3client(eventfd=%d) error.\n", fd_);
             close(fd_);            // 关闭客户端的fd。
+            
+            */
+
+
+
+            errorCallBack_();
+
+
+
         }
         ////////////////////////////////////////////////////////////////////////
 
@@ -170,8 +190,14 @@ void Channel::onMessage(){
         } 
         else if (nread == 0)  // 客户端连接已断开。
         {  
+            /*
+            
             printf("2client(eventfd=%d) disconnected.\n",fd_);
             close(fd_);            // 关闭客户端的fd。
+            */
+
+           // 调用 回调函数
+           closeCallBack_();
             break;
         }
     }
@@ -185,4 +211,15 @@ void Channel::setReadCallback(std::function<void()> readCallback)
     readCallback_ = readCallback;
 }
 
+
+
+
+// 设置 关闭 fd_ 的 回调函数； 将 回调 Connection::closeCallBack()
+void Channel::setCloseCallBack(std::function<void()> closeCallBack){
+    closeCallBack_ = closeCallBack;
+};
+ // 设置 fd_ 错误事件的。回调函数 ;  fd_ 发生错误 的 回调函数； 将 回调 Connection::errorCallBack()  
+void Channel::setErrorCallBack(std::function<void()> errorCallBack){
+    errorCallBack_ = errorCallBack;
+};   
 

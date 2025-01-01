@@ -19,6 +19,14 @@ class Connection{
         int fd() const;
         std::string ip() const;
         uint16_t port() const;
+
+
+
+
+        // 
+
+        void closeCallBack();   // TCP 连接 关闭 断开 的 回调函数， 供 Channel 回调
+        void errorCallBack();  //TCP 连接错误的 回调函数， 提供 Channel 回调
 };
 
 

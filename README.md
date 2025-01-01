@@ -61,6 +61,14 @@ Connection 类： Reactor_13_add_Connection_class
      4、 在 TcpServer 类中 增加 一个 map 容器， 用来保存 Connection 对象，   使用 fd 作为 map 的 key 连接的 connection 作为 value
      5、在 析构函数中 遍历 map 容器， 释放 Connection 对象的内存
 
+2025/01/01   23: 00
+在Channel类 中 回调 Connection类 的 成员函数 ： Reactor_17_add_Channel_closeCallBack_errorCallBack
+     1、由于 在 tcpServer 中 添加了map 容器，把 全部的 connection 对象都保存起来， 所以 在 析构函数中 会释放全部 connection 对象， 但是这样做存在一个问题，不能只在 析构函数中释放全部的 connection 对象
+     2、如果某一个 客户端断开了 或者连接 出错了 ， TcpServer 不知道的 ， 但是 Channel 类 知道，那么 需要 立即释放这个 connection 对象， 所以需要在 Channel 类中 回调 Connection类 的 成员函数 ， 释放 Connection 对象
+     3、 在 Channel 的 事件处理函数中， 如果 连接断开 或者 出错 都会执行相应的 代码， 但是 不能在 Channel 类中直接 ，因为 Connection 类中 没有在 Channel 中， 属于 TcpServe类
+     4、所以需要在 Channel 类中 回调 Connection类 的 成员函数 ， 释放 Connection 对象，  在 Connection 类中 增加 一个 成员函数， 释放 Connection 对象，  在 Channel 类中 回调 Connection类 的 成员函数 ， 释放 Connection 对象，所以使用 回调函数， 回调函数的代码只能写在 TcpServer 中
+     5、 Channel 类是 Connection 类的底层 类， Connection 是 TcpServer 的底层类， Tcp 连接 断开的时候， 可以在 Channel 类中 回调 Connection 类的 成员 函数， 通过 Connection 类的成员函数  再回调 TcpServer 类的成员函数
+
 
 
 

@@ -22,6 +22,11 @@ class Channel {
         // 添加 回调函数的 成员变量 =====
         // 函数的类型是 void() 参数为 空 
         std::function<void()> readCallback_; // fd_ 读事件 的。回调函数
+
+
+        // 添加 回调函数的 成员函数 =====
+        std::function<void()> closeCallBack_;    //  关闭 fd_ 的 回调函数； 将 回调 Connection::closeCallBack()
+        std::function<void()> errorCallBack_;    // fd_ 错误事件的。回调函数 ;  fd_ 发生错误 的 回调函数； 将 回调 Connection::errorCallBack()
     public:
         // Channel(Epoll* ep, int fd); // 构造函数
         Channel(EventLoop* eLoop, int fd); // 构造函数；    Channel 是 Acceptor 和 Connection 的 下层类 ； 
@@ -54,6 +59,9 @@ class Channel {
         void setReadCallback(std::function<void()> readCallback); // 设置  回调函数的成员函数。readCallback_
 
 
+        // 设置 两个 回调函数的 成员函数 
+        void setCloseCallBack(std::function<void()> closeCallBack);    // 设置 关闭 fd_ 的 回调函数； 将 回调 Connection::closeCallBack()
+        void setErrorCallBack(std::function<void()> errorCallBack);    // 设置 fd_ 错误事件的。回调函数 ;  fd_ 发生错误 的 回调函数； 将 回调 Connection::errorCallBack()
 };
 
 
