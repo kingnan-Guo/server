@@ -58,10 +58,8 @@ Connection 类： Reactor_13_add_Connection_class
      1、 首先在 socket.h 中增加一个  ip port 的结构体， 用来保存客户端的 ip 和 port
      2、 在 Connection 类 中 函数变量 ， 可以 获取 客户端的 ip 和 port
      3、 在 TcpServer 类中 打印 ip 和端口
-     4、 在 TcpServer 类中 增加 一个 map 容器， 用来保存 Connection 对象，  key 是 Connection 对象的 ip 和 port， value 是 Connection 对象的指针， 使用 fd 作为 map 的 key 连接的 connection 作为 value
+     4、 在 TcpServer 类中 增加 一个 map 容器， 用来保存 Connection 对象，   使用 fd 作为 map 的 key 连接的 connection 作为 value
      5、在 析构函数中 遍历 map 容器， 释放 Connection 对象的内存
-
-
 
 
 
