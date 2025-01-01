@@ -27,3 +27,18 @@ Connection::~Connection()
     delete clientScoket_; //
     delete clientChannel_;
 }
+
+
+
+
+int Connection::fd() const{
+    return clientScoket_->fd();
+};
+
+std::string Connection::ip() const{
+    return clientScoket_->ip();
+};
+
+uint16_t Connection::port() const{
+    return clientScoket_->port();
+};

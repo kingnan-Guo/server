@@ -71,6 +71,18 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port){
 
 TcpServer::~TcpServer(){
     delete acceptor_;
+
+    // 在析构函数 中 释放所有 connections_ 内的  fd 这段是 AI 写的 
+    // for (auto it = connections_.begin(); it != connections_.end(); it++){
+    //     delete it->second;
+    // }
+    // 在析构函数 中 释放所有 connections_ 内的  fd
+    for (auto &fd:connections_)
+    {
+        delete fd.second;
+    }
+    
+
 };
 
 // 运行时间循环 
@@ -86,7 +98,14 @@ void TcpServer::start(){
 
 // 处理 客户端的连接请求
 void TcpServer::newConnection(Socket* clinetSocket){
-    // printf ("accept client(fd=%d,ip=%s,port=%d) ok.\n",clinetSocket->fd(),clientaddr.ip(),clientaddr.port());
+
     Connection* connection = new Connection(&loop_, clinetSocket); // 这里new 出的对象没有释放
+
+    printf ("accept client( fd=%d, ip=%s, port=%d ) ok.\n", connection->fd(), connection->ip().c_str(), connection->port());
+
+
+    // 创建 connection 对象后 把 connection 对象 添加到 connections_  类型为 map 的 容器 中
+    connections_[connection->fd()] = connection;
+
 }
 

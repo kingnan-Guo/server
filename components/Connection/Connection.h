@@ -14,6 +14,11 @@ class Connection{
     public:
         Connection(EventLoop* loop, Socket* clientScoket);
         ~Connection();
+
+
+        int fd() const;
+        std::string ip() const;
+        uint16_t port() const;
 };
 
 

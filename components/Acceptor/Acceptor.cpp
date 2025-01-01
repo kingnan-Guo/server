@@ -85,7 +85,7 @@ void Acceptor::newConnection(){
     InetAddress clientaddr;    
     Socket* clientSock = new Socket(serverScoket_->accept(clientaddr));
 
-    printf ("accept client(fd=%d, ip=%s, port=%d ) ok.\n", clientSock->fd(), clientaddr.ip(), clientaddr.port());
+    // printf ("accept client(fd=%d, ip=%s, port=%d ) ok.\n", clientSock->fd(), clientaddr.ip(), clientaddr.port());
 
 
     /*

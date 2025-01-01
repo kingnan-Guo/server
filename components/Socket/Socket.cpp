@@ -91,6 +91,10 @@ void Socket::bind(const InetAddress &servaddr){
         close(fd_);
         exit(EXIT_FAILURE);
     }
+
+    // 监听的 fd
+    ip_ = servaddr.ip();
+    port_ = servaddr.port();
 }
 
 
@@ -114,5 +118,25 @@ int Socket::accept(InetAddress& clientaddr){
 
     clientaddr.setaddr(peeraddr);
 
+
+
+    // 客户端连接 的 fd 
+    ip_ = clientaddr.ip();
+    port_ = clientaddr.port();
+
     return clientfd;
+}
+
+
+
+
+
+std::string Socket::ip() const                              // 返回ip_成员。
+{
+    return ip_;
+}
+
+uint16_t Socket::port() const                              // 返回port_成员。
+{
+    return port_;
 }
