@@ -42,29 +42,72 @@ int clientSynchronization_main(int argc, char *argv[])
     printf("connect ok.\n");
     // printf("开始时间：%d",time(0));
 
+    // for (int ii=0; ii<100; ii++)
+    // {
+    //     // 从命令行输入内容。
+    //     memset(buf, 0, sizeof(buf));
+    //     sprintf(buf, "这是第 %d 个  ", ii);
+
+    //     if (send(sockfd,buf,strlen(buf),0) <=0)       // 把命令行输入的内容发送给服务端。
+    //     { 
+    //         printf("write() failed.\n");
+    //         close(sockfd);
+    //         return -1;
+    //     }
+        
+    //     memset(buf,0,sizeof(buf));
+    //     if (recv(sockfd,buf,sizeof(buf),0) <=0)      // 接收服务端的回应。
+    //     { 
+    //         printf("read() failed.\n");
+    //         close(sockfd);
+    //         return -1;
+    //     }
+
+    //     printf("recv:%s\n",buf);
+    // }
+
+
     for (int ii=0; ii<100; ii++)
     {
         // 从命令行输入内容。
-        memset(buf, 0, sizeof(buf));
-        sprintf(buf, "这是第 %d 个  ", ii);
 
-        if (send(sockfd,buf,strlen(buf),0) <=0)       // 把命令行输入的内容发送给服务端。
-        { 
-            printf("write() failed.\n");
-            close(sockfd);
-            return -1;
-        }
-        
+
         memset(buf,0,sizeof(buf));
-        if (recv(sockfd,buf,sizeof(buf),0) <=0)      // 接收服务端的回应。
+        sprintf(buf,"这是第%d个 数据。",ii);
+
+        int len=strlen(buf);        // 得到报文长度。
+        char tmp[1024];             // 报文头部（4字节的整数）+ 报文内容
+        memset(tmp, 0, sizeof(tmp));
+        memcpy(tmp, &len, 4);
+        memcpy(tmp+4, buf, len);
+
+        if (send(sockfd,tmp,len+4,0) <=0)       // 把整个报文的内容发送给服务端。
         { 
-            printf("read() failed.\n");
-            close(sockfd);
+            printf("write() failed.\n");  
+            close(sockfd);  
             return -1;
         }
+        // send(sockfd,tmp,len+4,0);
 
-        printf("recv:%s\n",buf);
     }
+
+    for (int ii=0; ii<100; ii++)
+    {
+        
+        // memset(buf,0,sizeof(buf));
+        // if (recv(sockfd,buf,sizeof(buf),0) <=0)      // 接收服务端的回应。
+        // { 
+        //     printf("read() failed.\n");
+        //     close(sockfd);
+        //     return -1;
+        // }
+
+        // printf("recv:%s\n",buf);
+
+
+
+    }
+
 
     // printf("结束时间：%d",time(0));
 } 
