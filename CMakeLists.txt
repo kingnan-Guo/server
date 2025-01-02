@@ -13,6 +13,7 @@ include_directories(
 
     module/client # 客户端
     module/epoll_client # epoll 客户端
+    module/clientSynchronization # 客户端同步 通信
 
     # 动态库 =========
     # /lib/print_t# 指定动态链接库的目录
