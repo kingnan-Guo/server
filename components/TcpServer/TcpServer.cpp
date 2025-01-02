@@ -116,6 +116,11 @@ void TcpServer::newConnection(Socket* clinetSocket){
     );
 
 
+    connection->setOnMessageCallBack(
+        // 回调函数，
+        std::bind(&TcpServer::onMessage, this, std::placeholders::_1, std::placeholders::_2)
+    );
+
 
     printf ("accept client( fd=%d, ip=%s, port=%d ) ok.\n", connection->fd(), connection->ip().c_str(), connection->port());
 
@@ -141,4 +146,21 @@ void TcpServer::errorConnection(Connection* connection){
     connections_.erase(connection->fd());       // 在 connections_ 中删除 connection 对象
     delete connection;
 };
+
+
+// 收到数据后的处理过程， 在 Connection 类中 回调此函数
+void TcpServer::onMessage(Connection* connection, std::string message){
+    
+    ///// 定制功能  不通用////
+    // 在这里，将经过若干步骤的运算。
+    message="reply:"+message;
+                
+    int len=message.size();                   // 计算回应报文的大小。
+    std::string tmpbuf((char*)&len,4);  // 把报文头部填充到回应报文中。
+    tmpbuf.append(message);             // 把报文内容填充到回应报文中。
+                
+    send(connection->fd(),tmpbuf.data(),tmpbuf.size(),0);   // 把临时缓冲区中的数据直接send()出去。
+
+
+}
 

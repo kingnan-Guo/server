@@ -31,5 +31,9 @@ class TcpServer{
 
         void closeConnection(Connection* connection); // 关闭客户端的连接，在 Connection 类中 回调词函数
         void errorConnection(Connection* connection); // 客户端连接的错误， 在 Connection 回调 此函数
+        
+        // 收到数据后的处理过程， 在 Connection 类中 回调此函数
+        void onMessage(Connection* connection, std::string message);
+
 
 };

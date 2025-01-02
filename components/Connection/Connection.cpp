@@ -88,6 +88,10 @@ void Connection::setErrorCallBack(std::function<void(Connection*)> errorCallBack
     errorCallBack_ = errorCallBack;
 };
 
+// 设置 回调函数 处理 message
+void Connection::setOnMessageCallBack(std::function<void(Connection*, std::string)> onMessageCallBack){
+    onMessageCallBack_ = onMessageCallBack;
+};
 
 
 //   处理 对端 发送过来的消息
@@ -114,21 +118,43 @@ void Connection::onMessage(){
         } 
         else if (nread == -1 && ((errno == EAGAIN) || (errno == EWOULDBLOCK))) // 全部的数据已读取完毕。
         {
-            // 
-            printf("recv(eventfd=%d):%s\n", fd(), inputBuffer_.data());
 
-            // 这里可以添加逻辑
+            /*
 
             outputBuffer_ = inputBuffer_; // 把接收到的数据，放到发送缓存区
-
-            
             inputBuffer_.clear(); // 清空接收缓存区
-
 
             // 把发送数据缓存区的 数据直接 send 出去
             send(
                 fd(), outputBuffer_.data(), outputBuffer_.size(), 0
             );// 发送数据
+
+            */
+
+            while (true)
+            {
+                ////////////////////////////////////////////////////////////
+                //// 这段是 定制的 报文头是 4 个字节 ///////////////// 之后要改成 Buffer类
+                // 可以把以下代码封装在Buffer类中，还可以支持固定长度、指定报文长度和分隔符等多种格式。
+                int len;
+                memcpy(&len, inputBuffer_.data(), 4);     // 从inputbuffer中获取报文头部。
+                // 如果inputbuffer中的数据量小于报文头部，说明inputbuffer中的报文内容不完整。
+                if (inputBuffer_.size()<len+4) break;
+
+                std::string message(inputBuffer_.data() + 4,len);   // 从inputbuffer中获取一个报文。
+                inputBuffer_.erase(0, len + 4);                                 // 从inputbuffer中删除刚才已获取的报文。
+                ////////////////////////////////////////////////////////////
+                
+                printf("recv( eventfd = %d ): %s\n", fd(), message.c_str());
+
+                // std::string message = inputBuffer_.data();
+                // printf("message (eventfd=%d):%s\n", fd(), message.data());
+                onMessageCallBack_(this, message); // 回调TcpServer::onMessage()。
+
+                // send(
+                //     fd(), inputBuffer_.data(), inputBuffer_.size(), 0
+                // );
+            }
 
 
             break;

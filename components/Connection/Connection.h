@@ -16,7 +16,7 @@ class Connection{
         // 添加回调函数
         std::function<void(Connection*)> closeCallBack_;  // TCP 连接 关闭 断开 的 回调函数， 供 Channel 回调
         std::function<void(Connection*)> errorCallBack_;  //TCP 连接错误的 回调函数， 提供 Channel 回调
-
+        std::function<void(Connection*, std::string)> onMessageCallBack_;  // TCP 连接 接收到消息 的 回调函数
 
         Buffer inputBuffer_;  // 接收数据的缓冲区
         Buffer outputBuffer_; // 发送数据的缓冲区
@@ -41,6 +41,7 @@ class Connection{
         // 设置 回调函数
         void setCloseCallBack(std::function<void(Connection*)> closeCallBack);
         void setErrorCallBack(std::function<void(Connection*)> errorCallBack);
+        void setOnMessageCallBack(std::function<void(Connection*, std::string)> onMessageCallBack);
 
 
 

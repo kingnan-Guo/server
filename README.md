@@ -102,6 +102,13 @@ Connection 类： Reactor_13_add_Connection_class
 
 
 
+2025/01/02   20: 00
+使用接收缓存区 inputBuffer_ 保存接收的数据 ： Reactor_20_use_inputBuffer_Receive_data
+     1、把 onmessage 切换到   void TcpServer::onMessage 中，在这里处理 业务曾逻辑
+     2、当前定制 添加 4 个字节的 头er， 用来保存数据包的长度， 服务器端先读取 header， 然后根据 header 中的长度去读取数据包， 这样就可以解决分包和粘包的问题
+     3、 所以 在 void Connection::onMessage() 收到的数据中 处理 头信息， 通过回调函数 调用 TcpServer::onMessage
+
+
 
 
 
