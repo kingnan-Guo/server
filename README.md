@@ -111,7 +111,7 @@ Connection 类： Reactor_13_add_Connection_class
 
 2025/01/02   21: 00
 使用发送缓存区 outPutBuffer_ 保存发送的数据 ： Reactor_21_use_outPutBuffer_Send_data
-     
+     有bug 就是在 水平触发的时候 不会多次执行 打印  EPOLLOUT 不知道为什么？？？？？？/
 
 
 
