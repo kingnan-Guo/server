@@ -92,9 +92,12 @@ void Socket::bind(const InetAddress &servaddr){
         exit(EXIT_FAILURE);
     }
 
-    // 监听的 fd
-    ip_ = servaddr.ip();
-    port_ = servaddr.port();
+    // // 监听的 fd
+    // ip_ = servaddr.ip();
+    // port_ = servaddr.port();
+    setIpPort(servaddr.ip(), servaddr.port());    // 设置 ip_ 和 port_ 成员变量
+
+
 }
 
 
@@ -110,7 +113,7 @@ void Socket::listen(int byte){
 }
 
 
-
+// 在 socket 类中只有服务端的 socket 才调用 accept 函数。
 int Socket::accept(InetAddress& clientaddr){
     struct sockaddr_in peeraddr;
     socklen_t len = sizeof(peeraddr);
@@ -120,9 +123,14 @@ int Socket::accept(InetAddress& clientaddr){
 
 
 
-    // 客户端连接 的 fd 
-    ip_ = clientaddr.ip();
-    port_ = clientaddr.port();
+    // //这两行的 代码 是 设置 客户端连接 的 fd ， 但是客户端调用 不会 调用这个函数。，所以要注掉
+    // ip_ = clientaddr.ip();
+    // port_ = clientaddr.port();
+
+
+
+   
+    
 
     return clientfd;
 }
@@ -140,3 +148,16 @@ uint16_t Socket::port() const                              // 返回port_成员�
 {
     return port_;
 }
+
+
+
+
+
+void Socket::setIpPort(const std::string &ip, uint16_t port){
+    ip_ = ip;
+    port_ = port;
+}
+
+
+
+

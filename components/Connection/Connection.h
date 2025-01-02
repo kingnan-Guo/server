@@ -5,6 +5,8 @@
 #include "Channel.h"
 #include "EventLoop.h"
 
+#include "Buffer.h"
+
 class Connection{
     private:
         EventLoop* loop_;    // Connection 对应的事件循环， 在构造函数中传入, 从外面传过来的 
@@ -14,6 +16,10 @@ class Connection{
         // 添加回调函数
         std::function<void(Connection*)> closeCallBack_;  // TCP 连接 关闭 断开 的 回调函数， 供 Channel 回调
         std::function<void(Connection*)> errorCallBack_;  //TCP 连接错误的 回调函数， 提供 Channel 回调
+
+
+        Buffer inputBuffer_;  // 接收数据的缓冲区
+        Buffer outputBuffer_; // 发送数据的缓冲区
 
     public:
         Connection(EventLoop* loop, Socket* clientScoket);
@@ -35,6 +41,11 @@ class Connection{
         // 设置 回调函数
         void setCloseCallBack(std::function<void(Connection*)> closeCallBack);
         void setErrorCallBack(std::function<void(Connection*)> errorCallBack);
+
+
+
+        // 处理 对端 发送过来的消息
+        void onMessage();    
 
 };
 

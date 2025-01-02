@@ -18,6 +18,8 @@ include_directories(
     components/TcpServer    # 封装 TcpServer 类
     components/Acceptor     # Acceptor 类
     components/Connection   # Connection 类
+    components/Buffer       # Buffer 类 , 数据缓冲区
+
     
 
     # 网络相关 =========

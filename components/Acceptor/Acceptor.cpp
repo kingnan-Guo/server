@@ -107,6 +107,12 @@ void Acceptor::newConnection(){
     ///////////////////////////////////////////////////////////////
     */
 
+
+
+   // 创建客户端的 socket 之后 ，把 ip 和 port 保存到 socket 中
+   clientSock->setIpPort(clientaddr.ip(), clientaddr.port());
+
+
    
 
    // 创建Connection对象，并添加到epoll中。

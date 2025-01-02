@@ -25,6 +25,8 @@ class Socket{
         void bind(const InetAddress &servaddr);
         void listen(int byte = 128);
         int accept(InetAddress& clientaddr);
+        
+        void setIpPort(const std::string &ip, uint16_t port);   // 设置 ip 和 port
 
         void setreuseaddr(bool on);       // 设置SO_REUSEADDR选项，true-打开，false-关闭。
         void setreuseport(bool on);       // 设置SO_REUSEPORT选项。

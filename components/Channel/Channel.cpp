@@ -167,7 +167,11 @@ void Channel::newConnection(Socket * serverScoket){
 }; 
 */
 
-// 处理 对端 发送过来的消息
+
+
+
+
+// 废弃 ：  处理 对端 发送过来的消息
 void Channel::onMessage(){
     char buffer[1024];
     while (true)             // 由于使用非阻塞IO，一次读取buffer大小数据，直到全部的数据读取完毕。
@@ -202,6 +206,8 @@ void Channel::onMessage(){
         }
     }
 };
+
+
 
 
 

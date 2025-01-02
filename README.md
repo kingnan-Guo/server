@@ -81,7 +81,24 @@ Connection 类： Reactor_13_add_Connection_class
      3、最终的目的是要在 TcpServer 中创建连接， 也要在 TcpServer 中关闭连接， 所以需要把 closeConnection errorConnection 绑定到 Connection 的 回调函数 中， 在 Connection 中 回调 TcpServer 的 closeConnection errorConnection 函数， 在 TcpServer 中 close(fd)
 
 
+2025/01/02   12：44
+网络编程缓冲区 ：分包 粘包
+     解决方法
+          添加 一个  header 包含 数据包的长度， 服务器端先读取 header， 然后根据 header 中的长度去读取数据包， 这样就可以解决分包和粘包的问题
 
+
+
+2025/01/02   14: 00
+封装缓冲区 buffer 类： Reactor_19_add_Buffer_class
+     1、添加 Buffer 类， 用来保存数据, 
+     2、在 Connection 类中   Buffer 类型的成员变量， 作为 接收数据的缓冲区 inputBuffer_ 和 发送数据的缓冲区  outputBuffer_
+     3、把 Channel 中的 onmessage  切换到 Connection 中
+     4、在  Connection::Connection 中修改 接收的 回调函数绑定
+     5、在 void Connection::onMessage() 把接收的数据放到 缓存区 里
+     6、发送时：  把 发送缓存区的 数据发送出去
+
+     修改bug *******************************
+     socket 中  储存 ip 和端口，但是 存储 客户端连上来的 ip和端口 卸载 accept 中 ，客户端连接 不会调用 accept 所以无法 拿到  客户端 的 ip和端口， 所以 在  void Acceptor::newConnection() 中 创建完  clientSock 之后 使用     clientSock->setIpPort(clientaddr.ip(), clientaddr.port()); 设置 ip 和端口
 
 
 

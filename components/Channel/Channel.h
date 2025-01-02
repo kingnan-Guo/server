@@ -51,10 +51,10 @@ class Channel {
         // 事件处理函数 ， epoll_wait() 返回的时候， 执行它 =====
         void handleEvent();
 
-
+    
         // 将 客户端连上来 和  连接的客户端的fd有事件 封装成 回调函数 ===== 
         // void newConnection(Socket * serverSocket); // 处理新客户端连接请求 ，修改到 Acceptor 类中
-        void onMessage();                           // 处理 对端 发送过来的消息
+        void onMessage();                           // 废弃 处理 对端 发送过来的消息
 
         void setReadCallback(std::function<void()> readCallback); // 设置  回调函数的成员函数。readCallback_
 
