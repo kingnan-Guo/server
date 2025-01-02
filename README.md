@@ -61,6 +61,8 @@ Connection 类： Reactor_13_add_Connection_class
      4、 在 TcpServer 类中 增加 一个 map 容器， 用来保存 Connection 对象，   使用 fd 作为 map 的 key 连接的 connection 作为 value
      5、在 析构函数中 遍历 map 容器， 释放 Connection 对象的内存
 
+
+
 2025/01/01   23: 00
 在Channel类 中 回调 Connection类 的 成员函数 ： Reactor_17_add_Channel_closeCallBack_errorCallBack
      1、由于 在 tcpServer 中 添加了map 容器，把 全部的 connection 对象都保存起来， 所以 在 析构函数中 会释放全部 connection 对象， 但是这样做存在一个问题，不能只在 析构函数中释放全部的 connection 对象
@@ -70,6 +72,37 @@ Connection 类： Reactor_13_add_Connection_class
      5、 Channel 类是 Connection 类的底层 类， Connection 是 TcpServer 的底层类， Tcp 连接 断开的时候， 可以在 Channel 类中 回调 Connection 类的 成员 函数， 通过 Connection 类的成员函数  再回调 TcpServer 类的成员函数
 
 
+
+2025/01/02   12: 43
+在  Connection 类中 回调 TcpServer 类 的 成员函数 ： Reactor_18_add_Connection_closeCallBack_errorCallBack
+     1、Connection 中 添加  closeCallBack 和 errorCallBack 的 成员函数，  
+     2、在 TcpServer 中添加  closeConnection errorConnection (本来是要在这两个函数中 close(fd()), 但是 在 connection 中 会关闭 socket ，在 socket的析构函数中会 close(fd), 所以不需要在 TcpServer 中 close(fd) )， 并且在 newconnection 把他们 绑定到 Connection 的 回调函数 中，
+
+     3、最终的目的是要在 TcpServer 中创建连接， 也要在 TcpServer 中关闭连接， 所以需要把 closeConnection errorConnection 绑定到 Connection 的 回调函数 中， 在 Connection 中 回调 TcpServer 的 closeConnection errorConnection 函数， 在 TcpServer 中 close(fd)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ # =========================================================================
 
 
 # server

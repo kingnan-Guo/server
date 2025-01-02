@@ -57,13 +57,33 @@ uint16_t Connection::port() const{
 
 // TCP 连接 关闭 断开 的 回调函数， 供 Channel 回调
 void Connection::closeCallBack(){
-    printf("1client(eventfd=%d) disconnected.\n", fd());
-    close(fd());     
+    // printf("1client(eventfd=%d) disconnected.\n", fd());
+    // close(fd());     
+
+    // 在 TcpServer 中，关闭连接，并删除 Channel
+    if(closeCallBack_){
+        closeCallBack_(this); // 回调TcpServer::closeconnection()。
+    }
 };
 
  //TCP 连接错误的 回调函数， 提供 Channel 回调
 void Connection::errorCallBack(){
-    printf("3client(eventfd=%d) error.\n", fd());
-    close(fd());            // 关闭客户端的fd。
-}; 
+    // printf("3client(eventfd=%d) error.\n", fd());
+    // close(fd());            // 关闭客户端的fd。
+    if(errorCallBack_){
+        errorCallBack_(this); // 回调TcpServer::errorconnection()。
+    }
+};
+
+
+
+// 设置 回调函数
+void Connection::setCloseCallBack(std::function<void(Connection*)> closeCallBack){
+    closeCallBack_ = closeCallBack;
+};
+
+void Connection::setErrorCallBack(std::function<void(Connection*)> errorCallBack){
+    errorCallBack_ = errorCallBack;
+};
+
 

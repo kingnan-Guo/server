@@ -101,6 +101,22 @@ void TcpServer::newConnection(Socket* clinetSocket){
 
     Connection* connection = new Connection(&loop_, clinetSocket); // 这里new 出的对象没有释放
 
+    connection->setCloseCallBack(
+        // 回调函数，当客户端断开连接时，此函数会被调用。
+        // @param &TcpServer::closeConnection       TcpServer对象中的成员函数。
+        // @param this                             TcpServer对象。
+        // @param std::placeholders::_1            当前无法传输这个值，所以 站位
+        std::bind(&TcpServer::closeConnection, this, std::placeholders::_1)
+    );
+
+    
+    connection->setErrorCallBack(
+        // 回调函数，当客户端连接发生错误时，此函数会被调用。
+        std::bind(&TcpServer::errorConnection, this, std::placeholders::_1)
+    );
+
+
+
     printf ("accept client( fd=%d, ip=%s, port=%d ) ok.\n", connection->fd(), connection->ip().c_str(), connection->port());
 
 
@@ -108,4 +124,21 @@ void TcpServer::newConnection(Socket* clinetSocket){
     connections_[connection->fd()] = connection;
 
 }
+
+// 关闭客户端的连接，在 Connection 类中 回调词函数
+void TcpServer::closeConnection(Connection* connection){
+    printf("client ( eventfd = %d ) disconnected.\n", connection->fd());
+    close(connection->fd());                // 关闭 客户端  fd
+    connections_.erase(connection->fd());       // 在 connections_ 中删除 connection 对象
+    delete connection;
+
+};
+
+// 客户端连接的错误， 在 Connection 回调 此函数
+void TcpServer::errorConnection(Connection* connection){
+    printf("client ( eventfd = %d ) error.\n", connection->fd());
+    close(connection->fd());
+    connections_.erase(connection->fd());       // 在 connections_ 中删除 connection 对象
+    delete connection;
+};
 

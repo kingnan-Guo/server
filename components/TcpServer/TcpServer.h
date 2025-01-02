@@ -27,4 +27,9 @@ class TcpServer{
         // 运行时间循环
         void start();
         void newConnection(Socket* clinetSocket);
+
+
+        void closeConnection(Connection* connection); // 关闭客户端的连接，在 Connection 类中 回调词函数
+        void errorConnection(Connection* connection); // 客户端连接的错误， 在 Connection 回调 此函数
+
 };
