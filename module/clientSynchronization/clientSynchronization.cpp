@@ -67,7 +67,7 @@ int clientSynchronization_main(int argc, char *argv[])
     // }
 
 
-    for (int ii=0; ii<100; ii++)
+    for (int ii=0; ii<2; ii++)
     {
         // 从命令行输入内容。
 
