@@ -28,8 +28,13 @@ Connection::Connection(EventLoop* loop, Socket* clientsock): loop_(loop), client
     );
 
 
+    clientChannel_->setWriteCallBack(
+        std::bind(&Connection::writeCallBack, this)
+    );
+
+
     // 客户端采用边缘触发
-    clientChannel_->useEt();
+    clientChannel_->useEt(); // 暂时 注掉 变成水平触发， 这样 EPOLLOUT 会触发很多次
     clientChannel_->enableReading();
 }
 
@@ -76,6 +81,8 @@ void Connection::errorCallBack(){
         errorCallBack_(this); // 回调TcpServer::errorconnection()。
     }
 };
+
+
 
 
 
@@ -173,3 +180,31 @@ void Connection::onMessage(){
         }
     }
 };
+
+
+// 发送数据。
+void Connection::send(const char *data,size_t size)        
+{
+    outputBuffer_.append(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
+
+    // 注册 写事件， 如果 数据缓存区 可以写入 ，那么就立即 发送; 
+    clientChannel_->enablewriting();
+}
+
+
+
+// 处理写事件的 回调函数， 供 channel 回调
+void Connection::writeCallBack(){
+    printf("writeCallBack 333\n");
+    // 把缓存区中的数据发送出去
+    int writen = ::send(fd(), outputBuffer_.data(), outputBuffer_.size(), 0);
+    if(writen > 0){
+        outputBuffer_.erase(0, writen); // 从缓存区中删除已发送的数据。
+
+    }
+
+    if(outputBuffer_.size() == 0){
+        // 如果缓存区为空，则关闭写事件
+        clientChannel_->disablewriting();
+    }
+};  

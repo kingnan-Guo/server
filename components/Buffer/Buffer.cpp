@@ -12,7 +12,7 @@ Buffer::~Buffer()
 
 
 // 把数据追加到 buffer_ 中
-void Buffer::append(char* data, int size){
+void Buffer::append(const char* data, int size){
     buffer_.append(data, size);
 };
 

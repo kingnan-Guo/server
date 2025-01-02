@@ -109,9 +109,9 @@ Connection 类： Reactor_13_add_Connection_class
      3、 所以 在 void Connection::onMessage() 收到的数据中 处理 头信息， 通过回调函数 调用 TcpServer::onMessage
 
 
-
-
-
+2025/01/02   21: 00
+使用发送缓存区 outPutBuffer_ 保存发送的数据 ： Reactor_21_use_outPutBuffer_Send_data
+     
 
 
 

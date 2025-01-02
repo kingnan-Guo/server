@@ -40,7 +40,27 @@ void Channel::enableReading(){
     //  ep_->updateChannel(this);
     loop_->updateChannel(this);
     
-}; 
+};
+
+// 让 epoll_wait() 停止监视 fd 的 读事件
+void Channel::disableReading(){
+    // 要监听 读事件
+    events_ =  events_ |  ~EPOLLIN;
+    loop_->updateChannel(this);
+};
+
+// 注册写事件。
+void Channel::enablewriting(){
+    events_|=EPOLLOUT;
+    loop_->updateChannel(this);
+};
+
+// 取消写事件。  
+void Channel::disablewriting(){
+    events_&=~EPOLLOUT;
+    loop_->updateChannel(this);
+};                     
+
 
 
 
@@ -84,6 +104,8 @@ void Channel::handleEvent(){
             close(fd_);            // 关闭客户端的fd。
             
             */
+
+           printf("EPOLLRDHUP \n");
            closeCallBack_();
 
 
@@ -91,22 +113,25 @@ void Channel::handleEvent(){
 
 
 
-        }                                //  普通数据  带外数据
+        } //  普通数据  带外数据
 
         else if (revents_ & (EPOLLIN | EPOLLPRI))   // 接收缓冲区中有数据可以读。
         {
 
-
+            printf("EPOLLIN | EPOLLPRI \n");
             readCallback_();
 
             
         }
 
-        else if (events_ & EPOLLOUT)                  // 有数据需要写，暂时没有代码，以后再说。
+        else if (revents_ & EPOLLOUT) // 有数据需要写，暂时没有代码，以后再说。
         {
+            printf("EPOLLOUT \n");
+            writeCallback_(); // 调 用回调函数 ， connection 类中定义的回调函数
+
         }
 
-        else                                                                    // 其它事件，都视为错误。
+        else // 其它事件，都视为错误。
         {
             /*
             printf("3client(eventfd=%d) error.\n", fd_);
@@ -227,5 +252,17 @@ void Channel::setCloseCallBack(std::function<void()> closeCallBack){
  // 设置 fd_ 错误事件的。回调函数 ;  fd_ 发生错误 的 回调函数； 将 回调 Connection::errorCallBack()  
 void Channel::setErrorCallBack(std::function<void()> errorCallBack){
     errorCallBack_ = errorCallBack;
-};   
+};
+
+
+void Channel::setWriteCallBack(std::function<void()> writeCallBack){
+    writeCallback_ = writeCallBack;
+};
+
+
+
+
+
+
+
 

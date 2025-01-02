@@ -38,6 +38,8 @@ class Connection{
         void closeCallBack();   // TCP 连接 关闭 断开 的 回调函数， 供 Channel 回调
         void errorCallBack();  //TCP 连接错误的 回调函数， 提供 Channel 回调
 
+        void writeCallBack();  // 处理写事件的 回调函数， 供 channel 回调
+
         // 设置 回调函数
         void setCloseCallBack(std::function<void(Connection*)> closeCallBack);
         void setErrorCallBack(std::function<void(Connection*)> errorCallBack);
@@ -46,8 +48,10 @@ class Connection{
 
 
         // 处理 对端 发送过来的消息
-        void onMessage();    
+        void onMessage();
 
+        // 发送数据
+        void send(const char *data,size_t size);        // 发送数据。
 };
 
 

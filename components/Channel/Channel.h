@@ -27,6 +27,10 @@ class Channel {
         // 添加 回调函数的 成员函数 =====
         std::function<void()> closeCallBack_;    //  关闭 fd_ 的 回调函数； 将 回调 Connection::closeCallBack()
         std::function<void()> errorCallBack_;    // fd_ 错误事件的。回调函数 ;  fd_ 发生错误 的 回调函数； 将 回调 Connection::errorCallBack()
+
+
+        // 添加回调函数 用于 
+        std::function<void()> writeCallback_;   // fd_ 写事件 的 回调函数， 将调用 Connection::writeCallBack()
     public:
         // Channel(Epoll* ep, int fd); // 构造函数
         Channel(EventLoop* eLoop, int fd); // 构造函数；    Channel 是 Acceptor 和 Connection 的 下层类 ； 
@@ -35,8 +39,12 @@ class Channel {
         int fd(); // 返回 fd
         void useEt(); // 采用边缘 触发
     
-        void enableReading(); // 让 epoll_wait() 监视 fd 的 读事件
+        void enableReading(); // 让 epoll_wait() 监视 fd 的 读事件， 就是 注册读事件
+
         void disableReading(); // 让 epoll_wait() 停止监视 fd 的 读事件
+        void enablewriting();                      // 注册写事件。
+        void disablewriting();                     // 取消写事件。
+
 
         void setInEpoll(bool inEpoll = true); // 设置 channel 是否在 epoll 中; 默认 把成员变量设置为 true
         bool inEpoll(); // 返回 channel 是否在 epoll 中
@@ -62,6 +70,12 @@ class Channel {
         // 设置 两个 回调函数的 成员函数 
         void setCloseCallBack(std::function<void()> closeCallBack);    // 设置 关闭 fd_ 的 回调函数； 将 回调 Connection::closeCallBack()
         void setErrorCallBack(std::function<void()> errorCallBack);    // 设置 fd_ 错误事件的。回调函数 ;  fd_ 发生错误 的 回调函数； 将 回调 Connection::errorCallBack()
+
+        void setWriteCallBack(std::function<void()> writeCallBack);   // 设置 fd_ 写事件 的 回调函数， 将调用 Connection::writeCallBack()
+
+
+
+
 };
 
 

@@ -159,8 +159,8 @@ void TcpServer::onMessage(Connection* connection, std::string message){
     std::string tmpbuf((char*)&len,4);  // 把报文头部填充到回应报文中。
     tmpbuf.append(message);             // 把报文内容填充到回应报文中。
                 
-    send(connection->fd(),tmpbuf.data(),tmpbuf.size(),0);   // 把临时缓冲区中的数据直接send()出去。
-
+    //send(connection->fd(),tmpbuf.data(),tmpbuf.size(),0);   // 把临时缓冲区中的数据直接send()出去。
+    connection->send(tmpbuf.data(),tmpbuf.size());   // 把临时缓冲区中的数据直接send()出去。
 
 }
 
