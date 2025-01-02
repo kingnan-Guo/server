@@ -53,7 +53,7 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port){
 
     */
 
-   acceptor_ = new Acceptor(&loop_, ip, port);
+    acceptor_ = new Acceptor(&loop_, ip, port);
 
     // 设置 回调函数
     acceptor_->setNewConnectionCallback(
@@ -65,8 +65,12 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port){
         std::bind(&TcpServer::newConnection, this, std::placeholders::_1)
     );
 
+    // 设置 超时 回调函数
+    loop_.setEpollTimeOutCallBack(
+        std::bind(&TcpServer::epollTimeOut, this, std::placeholders::_1)
+    );
 
-};
+}
 
 
 TcpServer::~TcpServer(){
@@ -121,6 +125,11 @@ void TcpServer::newConnection(Socket* clinetSocket){
         std::bind(&TcpServer::onMessage, this, std::placeholders::_1, std::placeholders::_2)
     );
 
+    connection->setSendCompletionCallback(
+        // 回调函数，
+        std::bind(&TcpServer::sendCompletionCallback, this, std::placeholders::_1)
+    );
+
 
     printf ("accept client( fd=%d, ip=%s, port=%d ) ok.\n", connection->fd(), connection->ip().c_str(), connection->port());
 
@@ -163,4 +172,18 @@ void TcpServer::onMessage(Connection* connection, std::string message){
     connection->send(tmpbuf.data(),tmpbuf.size());   // 把临时缓冲区中的数据直接send()出去。
 
 }
+
+void TcpServer::sendCompletionCallback(Connection* connection){
+    printf("send completion callback.\n");
+
+    //
+}
+
+
+//  epoll_wait() 超时，在 EvebtLoop 类中回调 此函数
+void TcpServer::epollTimeOut(EventLoop * loop){
+    printf("epoll_wait timeOut .\n");
+    // 可以添加需求代码
+}
+
 

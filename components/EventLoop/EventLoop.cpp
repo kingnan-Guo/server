@@ -47,7 +47,14 @@ void EventLoop::run(){
         
         std::vector<Channel *> channels; // 存放epoll_wait()返回事件的数组。
         //  
-        channels = ep_->loop();
+        channels = ep_->loop(10 * 1000); // 10s 超时
+
+
+        // 在事件循环中 判断 channels 是否为空, 如果为空，表示 超时
+        if(channels.size() == 0){
+            // 调用回调函数
+            epollTimeOutCallBack_(this);
+        }
 
 
 
@@ -71,4 +78,12 @@ void EventLoop::run(){
 void EventLoop::updateChannel(Channel *ch)                        
 {
     ep_->updateChannel(ch);
+}
+
+
+
+
+// void setEpollTimeOutCallBack(std::function<void(EventLoop*)> cb)
+void EventLoop::setEpollTimeOutCallBack(std::function<void(EventLoop*)> cb){
+    epollTimeOutCallBack_ = cb;
 }

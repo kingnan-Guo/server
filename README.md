@@ -116,7 +116,8 @@ Connection 类： Reactor_13_add_Connection_class
 
 2025/01/01   23: 00
 优化回调函数： Reactor_22_optimize_callback_function
-     
+     1、实现 setSendCompletionCallback 数据发送完成的 回调， Connection 调用 void TcpServer::sendCompletionCallback 
+     2、实现 超时 回调， epoll 中的 超时 ，在 Eventloop 中判断 channels 然后如果超时 ，调取 TcpServer 中的超时 回调函数
 
 
 

@@ -35,5 +35,8 @@ class TcpServer{
         // 收到数据后的处理过程， 在 Connection 类中 回调此函数
         void onMessage(Connection* connection, std::string message);
 
-
+        // 发送数据完成后的处理过程， 在 Connection 类中 回调此函数
+        void sendCompletionCallback(Connection* connection);
+        // epoll_wait() 超时，在 EvebtLoop 类中回调 此函数
+        void epollTimeOut(EventLoop * loop);// 现在的 tcp serve 中只有一个事件循环，在以后的 版本中，可以扩展为多个事件循环， 所以要传 loop 参数
 };

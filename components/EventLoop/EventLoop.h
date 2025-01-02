@@ -1,5 +1,6 @@
 #pragma once
 #include "Epoll.h"
+#include <functional>
 /**
  *  每个 事件循环里肯定有一个 epoll 
  */
@@ -12,6 +13,7 @@ class EventLoop
 {
     private:
         Epoll * ep_;
+        std::function<void(EventLoop*)> epollTimeOutCallBack_;  // TCP 连接 关闭 断开 的 回调函数， 供 Channel 回调
     public:
         EventLoop();
         ~EventLoop();
@@ -24,6 +26,9 @@ class EventLoop
 
 
         void updateChannel(Channel *ch);                        // 把channel添加/更新到红黑树上，channel中有fd，也有需要监视的事件。
+
+        // epollTimeOutCallBack_
+        void setEpollTimeOutCallBack(std::function<void(EventLoop*)> cb);
 };
 
 

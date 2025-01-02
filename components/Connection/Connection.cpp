@@ -100,6 +100,10 @@ void Connection::setOnMessageCallBack(std::function<void(Connection*, std::strin
     onMessageCallBack_ = onMessageCallBack;
 };
 
+void Connection::setSendCompletionCallback(std::function<void(Connection*)> sendCompletionCallback){
+     sendCompletionCallback_ = sendCompletionCallback;
+}
+
 
 //   处理 对端 发送过来的消息
 void Connection::onMessage(){
@@ -206,5 +210,7 @@ void Connection::writeCallBack(){
     if(outputBuffer_.size() == 0){
         // 如果缓存区为空，则关闭写事件
         clientChannel_->disablewriting();
+        // 数据发送完成之后调用 回调函数
+        sendCompletionCallback_(this);
     }
 };  
