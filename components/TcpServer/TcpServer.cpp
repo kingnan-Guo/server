@@ -137,10 +137,21 @@ void TcpServer::newConnection(Socket* clinetSocket){
     // 创建 connection 对象后 把 connection 对象 添加到 connections_  类型为 map 的 容器 中
     connections_[connection->fd()] = connection;
 
+    // 回调 newConnectionCallBack_
+    if (newConnectionCallBack_){
+        newConnectionCallBack_(connection);
+    }
+
 }
 
 // 关闭客户端的连接，在 Connection 类中 回调词函数
 void TcpServer::closeConnection(Connection* connection){
+
+    if(closeConnectionCallBack_){
+        closeConnectionCallBack_(connection);
+    }
+
+
     printf("client ( eventfd = %d ) disconnected.\n", connection->fd());
     close(connection->fd());                // 关闭 客户端  fd
     connections_.erase(connection->fd());       // 在 connections_ 中删除 connection 对象
@@ -150,6 +161,11 @@ void TcpServer::closeConnection(Connection* connection){
 
 // 客户端连接的错误， 在 Connection 回调 此函数
 void TcpServer::errorConnection(Connection* connection){
+    if(errorConnectionCallBack_){
+        errorConnectionCallBack_(connection);
+    }
+
+
     printf("client ( eventfd = %d ) error.\n", connection->fd());
     close(connection->fd());
     connections_.erase(connection->fd());       // 在 connections_ 中删除 connection 对象
@@ -160,6 +176,8 @@ void TcpServer::errorConnection(Connection* connection){
 // 收到数据后的处理过程， 在 Connection 类中 回调此函数
 void TcpServer::onMessage(Connection* connection, std::string message){
     
+    // printf("client ( eventfd = %d ) message: %s\n", connection->fd(), message.c_str());
+    /*
     ///// 定制功能  不通用////
     // 在这里，将经过若干步骤的运算。
     message="reply:"+message;
@@ -170,13 +188,22 @@ void TcpServer::onMessage(Connection* connection, std::string message){
                 
     //send(connection->fd(),tmpbuf.data(),tmpbuf.size(),0);   // 把临时缓冲区中的数据直接send()出去。
     connection->send(tmpbuf.data(),tmpbuf.size());   // 把临时缓冲区中的数据直接send()出去。
+    */
+
+
+    // 回调 onMessageCallBack_
+    if (onMessageCallBack_){
+        onMessageCallBack_(connection, message);
+    }
 
 }
 
 void TcpServer::sendCompletionCallback(Connection* connection){
     printf("send completion callback.\n");
-
-    //
+    if (sendCompleteCallBack_)
+    {
+        sendCompleteCallBack_(connection);
+    }
 }
 
 
@@ -184,6 +211,33 @@ void TcpServer::sendCompletionCallback(Connection* connection){
 void TcpServer::epollTimeOut(EventLoop * loop){
     printf("epoll_wait timeOut .\n");
     // 可以添加需求代码
+    if(timeOutCallBack_){
+        timeOutCallBack_(loop);
+    }
 }
 
 
+
+void TcpServer::setNewConnectionCallBack(std::function<void(Connection*)> newConnectionCallBack){
+    newConnectionCallBack_ = newConnectionCallBack;
+};
+
+void TcpServer::setCloseConnectionCallBack(std::function<void(Connection*)> closeConnectionCallBack){
+    closeConnectionCallBack_ = closeConnectionCallBack;
+};
+
+void TcpServer::setErrorConnectionCallBack(std::function<void(Connection*)> errorConnectionCallBack){
+    errorConnectionCallBack_ = errorConnectionCallBack;
+};
+
+void TcpServer::setOnMessageCallBack(std::function<void(Connection*,std::string &message)> onMessageCallBack){
+    onMessageCallBack_ = onMessageCallBack;
+};
+
+void TcpServer::setSendCompleteCallBack(std::function<void(Connection*)> sendCompleteCallBack){
+    sendCompleteCallBack_ = sendCompleteCallBack;
+};
+
+void TcpServer::setTimeOutCallBack(std::function<void(EventLoop*)> timeOutCallBack){
+    timeOutCallBack_ = timeOutCallBack;
+};
