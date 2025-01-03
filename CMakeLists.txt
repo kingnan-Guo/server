@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.29)
 project(Reactor)
 
-set(CMAKE_CXX_STANDARD 20)
-
+# set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 11)
 # 指定头文件  module/log
 #include_directories(${PROJECT_SOURCE_DIR}/module)
 
@@ -20,6 +20,8 @@ include_directories(
     components/Connection   # Connection 类
     components/Buffer       # Buffer 类 , 数据缓冲区
 
+
+    components/ThreadPool   # 线程池 Demo
 
 
 
@@ -43,7 +45,19 @@ file(GLOB_RECURSE MODULE  "module/*.*" "components/*.*" )
 
 file(GLOB_RECURSE SOURCES main.cpp)
 
+# 查找线程库
+find_package(Threads REQUIRED)
+
+
 add_executable(Reactor ${SOURCES} ${MODULE})
+
+# 链接线程库
+target_link_libraries(Reactor PRIVATE Threads::Threads)
+
+
+
+
+
 
 
 
