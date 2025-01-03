@@ -135,10 +135,16 @@ Connection 类： Reactor_13_add_Connection_class
      1、 std::function<void(Connection*, std::string)> onMessageCallBack_;  改成 std::function<void(Connection*, std::string&)> onMessageCallBack_ ， 值引用的方式传递
      2、Buffer 类中 添加  处理数据 添加 报头文件
 
+     
+
+
 
      修改bug *******************************
      Reactor_23_EchoServer 之前这里的 std::function<void(Connection*, std::string)> onMessageCallBack_;  部分 值传递 ，部分是值引用 ，所以在  Reactor_24_optimize_Buffer_class 中 解决 此 bug
 
+
+
+     # 这个版本可以用来开发 业务了 #
 
 
 
