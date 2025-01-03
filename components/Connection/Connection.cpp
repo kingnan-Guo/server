@@ -189,8 +189,8 @@ void Connection::onMessage(){
 // 发送数据。
 void Connection::send(const char *data,size_t size)        
 {
-    outputBuffer_.append(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
-    // outputBuffer_.appendWithHearder(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
+    // outputBuffer_.append(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
+    outputBuffer_.appendWithHearder(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
 
     // 注册 写事件， 如果 数据缓存区 可以写入 ，那么就立即 发送; 
     clientChannel_->enablewriting();

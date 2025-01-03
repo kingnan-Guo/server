@@ -1,6 +1,6 @@
 #include "EchoServer.h"
 
-EchoServer::EchoServer(const std::string &ip, const uint16_t port):tcpServer_(ip, port)
+EchoServer::EchoServer(const std::string &ip, const uint16_t port, int threadNum):tcpServer_(ip, port, threadNum)
 {
 
     // 设置回调函数
@@ -39,6 +39,7 @@ void EchoServer::Start(){
  // 处理新客户端连接请求，在TcpServer类中回调此函数。
 void EchoServer::HandleNewConnection(Connection* connection){
     std::cout << "New Connection Come in." << std::endl;
+        std::cout << "HandleNewConnection   thread id : " << syscall(SYS_gettid) << std::endl;
 };
 
                 // 关闭客户端的连接，在TcpServer类中回调此函数。 
@@ -53,8 +54,11 @@ void EchoServer::HandleError(Connection *connection){
 
 // 处理客户端的请求报文，在TcpServer类中回调此函数。
 void EchoServer::HandleMessage(Connection *connection, std::string& message){
+
+
+    std::cout << "HandleMessage   thread id : " << syscall(SYS_gettid) << std::endl;
     // 在这里，将经过若干步骤的运算。
-        std::cout << "HandleMessage   data: " << message << std::endl;
+    std::cout << "HandleMessage   data: " << message << std::endl;
     // 将运算结果返回给客户端
 
 

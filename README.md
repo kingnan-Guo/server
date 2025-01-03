@@ -151,6 +151,14 @@ Connection 类： Reactor_13_add_Connection_class
 封装线程池 ThreadPool ： Reactor_25_add_ThreadPool_class
      
 
+2025/01/04   00:418
+多线程的主从 Reactor 模型 ： Reactor_26_MultiThread_Reactor_Model
+     1、 运行多个事件循环， 主从时间循环运行在主线程中，从事件循环运行 在线程池中， 
+     2、 主线程负责接收客户端的连接， 把 Connection 连接交给从线程池中的线程处理， 从线程池中的线程负责处理业务逻辑
+     3、在线程池中运行事件循环， 把 EventLoop 的 run（） 作为任务 添加给 线程池， 线程池中的线程运行这个任务， 就可以运行事件循环了
+     4、在 EchoServer 中 传入 线程数
+     5、处理 客户端的连接请求 ， 把 Connection 交给 线程池中的线程处理， 在线程池中的线程中处理业务逻辑；  Connection* connection = new Connection(subLoop_[clinetSocket->fd() % threadNum_], clinetSocket);
+
 
 
 

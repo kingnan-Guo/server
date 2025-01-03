@@ -39,8 +39,8 @@ void Buffer::clear(){
 
 // 把数据追加到buf_中，附加报文头部。
 void Buffer::appendWithHearder(const char* data, size_t size){
-    buffer_.append((char*)&size, 4);   // 处理报文长度（头部）。
-    // buffer_.append((char*)"HEAD", 4);   // 处理报文长度（头部）。
+    // buffer_.append((char*)&size, 4);   // 处理报文长度（头部）。
+    buffer_.append((char*)"HEAD", 4);   // 处理报文长度（头部）。
     buffer_.append(data, size);         // 处理报文内容。
 }
 

@@ -92,6 +92,10 @@ void ThreadPool::addTask(std::function<void()> task){
 
 
 
+/*
+
+
+
 void show(int no, const std::string &name){
     printf("show 第 %d 个%s。\n", no, name.c_str());
 }
@@ -122,3 +126,5 @@ int ThreadPool_MAIN(){
     sleep(100);
     return 0;
 }
+
+*/

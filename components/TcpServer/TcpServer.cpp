@@ -1,7 +1,7 @@
 #include "TcpServer.h"
 
 
-TcpServer::TcpServer(const std::string &ip, const uint16_t port){
+TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum): threadNum_(threadNum){
 
     /*
     // Socket serverScoket(createnonblocking()); 不能使用这个 ，因为 离开 TcpServer 后 会调用  ~Socket() ，会关闭fd，导致epoll监听失败。 所以使用下面的 
@@ -52,8 +52,16 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port){
     servChannel->enableReading();
 
     */
+    // 创建一个 EventLoop 对象
+    mainLoop_ = new EventLoop();
+    // 设置 超时 回调函数
+    mainLoop_->setEpollTimeOutCallBack(
+        std::bind(&TcpServer::epollTimeOut, this, std::placeholders::_1)
+    );
 
-    acceptor_ = new Acceptor(&loop_, ip, port);
+
+
+    acceptor_ = new Acceptor(mainLoop_, ip, port);
 
     // 设置 回调函数
     acceptor_->setNewConnectionCallback(
@@ -65,16 +73,34 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port){
         std::bind(&TcpServer::newConnection, this, std::placeholders::_1)
     );
 
-    // 设置 超时 回调函数
-    loop_.setEpollTimeOutCallBack(
-        std::bind(&TcpServer::epollTimeOut, this, std::placeholders::_1)
-    );
+
+
+    // 创建线程池
+    threadPool_ = new ThreadPool(threadNum_);
+    
+    // 创建从事件 循环
+    for(int i = 0; i < threadNum_; i++){
+        // 创建一个 EventLoop 对象,放入到 subLoop_ 容器 中
+        subLoop_.push_back(new EventLoop());
+        subLoop_[i]->setEpollTimeOutCallBack(
+            std::bind(&TcpServer::epollTimeOut, this, std::placeholders::_1)
+        );
+        // 把 EventLoop 的 run（） 作为任务 添加给 线程池， 线程池中的线程运行这个任务， 就可以运行事件循环了
+        threadPool_->addTask(
+            std::bind(&EventLoop::run, subLoop_[i])
+        );
+
+    }
+
+    // 
+
 
 }
 
 
 TcpServer::~TcpServer(){
     delete acceptor_;
+    delete mainLoop_;
 
     // 在析构函数 中 释放所有 connections_ 内的  fd 这段是 AI 写的 
     // for (auto it = connections_.begin(); it != connections_.end(); it++){
@@ -91,7 +117,7 @@ TcpServer::~TcpServer(){
 
 // 运行时间循环 
 void TcpServer::start(){
-    loop_.run();
+    mainLoop_->run();
 };
 
 
@@ -103,7 +129,10 @@ void TcpServer::start(){
 // 处理 客户端的连接请求
 void TcpServer::newConnection(Socket* clinetSocket){
 
-    Connection* connection = new Connection(&loop_, clinetSocket); // 这里new 出的对象没有释放
+    //Connection* connection = new Connection(mainLoop_, clinetSocket); // 这里new 出的对象没有释放
+
+    // 把 客户端的fd 分配给 线程池 中的线程
+    Connection* connection = new Connection(subLoop_[clinetSocket->fd() % threadNum_], clinetSocket); // 这里new 出的对象没有释放
 
     connection->setCloseCallBack(
         // 回调函数，当客户端断开连接时，此函数会被调用。

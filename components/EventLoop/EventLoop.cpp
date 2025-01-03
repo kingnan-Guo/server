@@ -1,5 +1,6 @@
 #include "EventLoop.h"
-
+#include <sys/syscall.h>
+#include <unistd.h>
 
 // 构造函数 
 // 创建 ep_  = new Epoll
@@ -26,6 +27,8 @@ Epoll* EventLoop::ep()
 
 // 循环
 void EventLoop::run(){
+
+    printf("EventLoop::run() start : 线程id thread id  = %d \n", syscall(SYS_gettid));
 
     // 改造前
     // while (true)        // 事件循环。
