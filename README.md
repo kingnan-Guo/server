@@ -76,8 +76,7 @@ Connection 类： Reactor_13_add_Connection_class
 2025/01/02   12: 43
 在  Connection 类中 回调 TcpServer 类 的 成员函数 ： Reactor_18_add_Connection_closeCallBack_errorCallBack
      1、Connection 中 添加  closeCallBack 和 errorCallBack 的 成员函数，  
-     2、在 TcpServer 中添加  closeConnection errorConnection (本来是要在这两个函数中 close(fd()), 但是 在 connection 中 会关闭 socket ，在 socket的析构函数中会 close(fd), 所以不需要在 TcpServer 中 close(fd) )， 并且在 newconnection 把他们 绑定到 Connection 的 回调函数 中，
-
+     2、在 TcpServer 中添加  closeConnection errorConnection (本来是要在这两个函数中 close(fd()), 但是 在 connection 中 会关闭 socket ，在 socket的析构函数中会 close(fd), 所以不需要在 TcpServer 中 close(fd) )， 并且在 newconnection 把他们 绑定到 Connection 的 回调函数 中
      3、最终的目的是要在 TcpServer 中创建连接， 也要在 TcpServer 中关闭连接， 所以需要把 closeConnection errorConnection 绑定到 Connection 的 回调函数 中， 在 Connection 中 回调 TcpServer 的 closeConnection errorConnection 函数， 在 TcpServer 中 close(fd)
 
 
@@ -111,7 +110,8 @@ Connection 类： Reactor_13_add_Connection_class
 
 2025/01/02   21: 00
 使用发送缓存区 outPutBuffer_ 保存发送的数据 ： Reactor_21_use_outPutBuffer_Send_data
-     有bug 就是在 水平触发的时候 不会多次执行 打印  EPOLLOUT 不知道为什么？？？？？？
+     有bug ****************************
+     就是在 水平触发的时候 不会多次执行 打印  EPOLLOUT 不知道为什么？？？？？？
 
 
 2025/01/01   23: 00
@@ -124,6 +124,20 @@ Connection 类： Reactor_13_add_Connection_class
 实现回显服务器EchoServer ： Reactor_23_EchoServer
      1、在 tcpServer 中 创建。回调函数
      2、EchoServer 调取这些 回调函数， EchoServer 中实现业务逻辑
+     
+     有 bug *****************************
+     启动后， 第一次 客户端有值传上来 会收不到， 第二次再连上来 就可以 
+
+
+
+2025/01/03   12: 57
+优化Buffer 类： Reactor_24_optimize_Buffer_class
+     1、 std::function<void(Connection*, std::string)> onMessageCallBack_;  改成 std::function<void(Connection*, std::string&)> onMessageCallBack_ ， 值引用的方式传递
+     2、Buffer 类中 添加  处理数据 添加 报头文件
+
+
+     修改bug *******************************
+     Reactor_23_EchoServer 之前这里的 std::function<void(Connection*, std::string)> onMessageCallBack_;  部分 值传递 ，部分是值引用 ，所以在  Reactor_24_optimize_Buffer_class 中 解决 此 bug
 
 
 
@@ -133,7 +147,21 @@ Connection 类： Reactor_13_add_Connection_class
 
 
 
- # =========================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ========================================
 
 
 # server

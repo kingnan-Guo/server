@@ -96,7 +96,7 @@ void Connection::setErrorCallBack(std::function<void(Connection*)> errorCallBack
 };
 
 // 设置 回调函数 处理 message
-void Connection::setOnMessageCallBack(std::function<void(Connection*, std::string)> onMessageCallBack){
+void Connection::setOnMessageCallBack(std::function<void(Connection*, std::string&)> onMessageCallBack){
     onMessageCallBack_ = onMessageCallBack;
 };
 
@@ -190,6 +190,7 @@ void Connection::onMessage(){
 void Connection::send(const char *data,size_t size)        
 {
     outputBuffer_.append(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
+    // outputBuffer_.appendWithHearder(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
 
     // 注册 写事件， 如果 数据缓存区 可以写入 ，那么就立即 发送; 
     clientChannel_->enablewriting();

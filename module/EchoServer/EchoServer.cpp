@@ -52,14 +52,13 @@ void EchoServer::HandleError(Connection *connection){
 };     
 
 // 处理客户端的请求报文，在TcpServer类中回调此函数。
-void EchoServer::HandleMessage(Connection *connection, std::string message){
+void EchoServer::HandleMessage(Connection *connection, std::string& message){
     // 在这里，将经过若干步骤的运算。
         std::cout << "HandleMessage   data: " << message << std::endl;
     // 将运算结果返回给客户端
 
 
     // / 自定义协议，报文格式为：报文长度（4字节）+报文内容。
-    message = "reply: " + message;
     // int len = message.size();                   // 计算回应报文的大小。
     // std::string tmpbuf((char*)&len,4);  // 把报文头部填充到回应报文中。
     // tmpbuf.append(message);             // 把报文内容填充到回应报文中。

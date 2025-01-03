@@ -42,7 +42,7 @@ class TcpServer{
         void errorConnection(Connection* connection); // 客户端连接的错误， 在 Connection 回调 此函数
         
         // 收到数据后的处理过程， 在 Connection 类中 回调此函数
-        void onMessage(Connection* connection, std::string message);
+        void onMessage(Connection* connection, std::string & message);
 
         // 发送数据完成后的处理过程， 在 Connection 类中 回调此函数
         void sendCompletionCallback(Connection* connection);
@@ -55,7 +55,7 @@ class TcpServer{
         void setNewConnectionCallBack(std::function<void(Connection*)> newConnectionCallBack);
         void setCloseConnectionCallBack(std::function<void(Connection*)> closeConnectionCallBack);
         void setErrorConnectionCallBack(std::function<void(Connection*)> errorConnectionCallBack);
-        void setOnMessageCallBack(std::function<void(Connection*,std::string &message)> onMessageCallBack);
+        void setOnMessageCallBack(std::function<void(Connection*,std::string & message)> onMessageCallBack);
         void setSendCompleteCallBack(std::function<void(Connection*)> sendCompleteCallBack);
         void setTimeOutCallBack(std::function<void(EventLoop*)> timeOutCallBack);
 

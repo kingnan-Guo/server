@@ -174,7 +174,7 @@ void TcpServer::errorConnection(Connection* connection){
 
 
 // 收到数据后的处理过程， 在 Connection 类中 回调此函数
-void TcpServer::onMessage(Connection* connection, std::string message){
+void TcpServer::onMessage(Connection* connection, std::string& message){
     
     // printf("client ( eventfd = %d ) message: %s\n", connection->fd(), message.c_str());
     /*
