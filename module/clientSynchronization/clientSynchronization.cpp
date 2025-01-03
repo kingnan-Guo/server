@@ -67,7 +67,7 @@ int clientSynchronization_main(int argc, char *argv[])
     // }
 
 
-    for (int ii=0; ii<2; ii++)
+    for (int ii=0; ii<5; ii++)
     {
         // 从命令行输入内容。
 
@@ -94,15 +94,15 @@ int clientSynchronization_main(int argc, char *argv[])
     for (int ii=0; ii<100; ii++)
     {
         
-        // memset(buf,0,sizeof(buf));
-        // if (recv(sockfd,buf,sizeof(buf),0) <=0)      // 接收服务端的回应。
-        // { 
-        //     printf("read() failed.\n");
-        //     close(sockfd);
-        //     return -1;
-        // }
+        memset(buf,0,sizeof(buf));
+        if (recv(sockfd,buf,sizeof(buf),0) <=0)      // 接收服务端的回应。
+        { 
+            printf("read() failed.\n");
+            close(sockfd);
+            return -1;
+        }
 
-        // printf("recv:%s\n",buf);
+        printf("recv:%s\n",buf);
 
 
 
