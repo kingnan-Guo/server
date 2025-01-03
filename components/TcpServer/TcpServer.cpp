@@ -111,7 +111,13 @@ TcpServer::~TcpServer(){
     {
         delete fd.second;
     }
-    
+
+    // 在析构函数 中 释放所有 subLoop_ 内的  fd
+    for (auto &fd:subLoop_)
+    {
+        delete fd;
+    }
+    delete threadPool_;
 
 };
 
