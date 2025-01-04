@@ -76,7 +76,7 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum):
 
 
     // 创建线程池
-    threadPool_ = new ThreadPool(threadNum_);
+    threadPool_ = new ThreadPool(threadNum_, "IO");
     
     // 创建从事件 循环
     for(int i = 0; i < threadNum_; i++){

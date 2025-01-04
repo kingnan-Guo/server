@@ -1,6 +1,18 @@
 #include "EchoServer.h"
 
-EchoServer::EchoServer(const std::string &ip, const uint16_t port, int threadNum):tcpServer_(ip, port, threadNum)
+
+/**
+ * 
+ * @EchoServer 构造函数
+ * 
+ * @ip 服务器ip地址
+ * @port 服务器端口号
+ * @subThreadNum 子线程数量
+ * @workThreadNum 工作线程数量
+ * 
+ * threadPool_(workThreadNum)  创建工作线程池, 有了线程池 之后 把 业务处理 放到线程池中执行
+*/
+EchoServer::EchoServer(const std::string &ip, const uint16_t port, int subThreadNum, int workThreadNum):tcpServer_(ip, port, subThreadNum), threadPool_(workThreadNum, "WORKS")
 {
 
     // 设置回调函数
@@ -38,8 +50,8 @@ void EchoServer::Start(){
 
  // 处理新客户端连接请求，在TcpServer类中回调此函数。
 void EchoServer::HandleNewConnection(Connection* connection){
-    std::cout << "New Connection Come in." << std::endl;
-        std::cout << "HandleNewConnection   thread id : " << syscall(SYS_gettid) << std::endl;
+    // std::cout << "New Connection Come in." << std::endl;
+    std::cout << "New Connection Come in. HandleNewConnection   thread id : " << syscall(SYS_gettid) << std::endl;
 };
 
                 // 关闭客户端的连接，在TcpServer类中回调此函数。 
@@ -56,9 +68,9 @@ void EchoServer::HandleError(Connection *connection){
 void EchoServer::HandleMessage(Connection *connection, std::string& message){
 
 
-    std::cout << "HandleMessage   thread id : " << syscall(SYS_gettid) << std::endl;
+    std::cout << "HandleMessage   thread id : " << syscall(SYS_gettid) << " message : " << message << std::endl;
     // 在这里，将经过若干步骤的运算。
-    std::cout << "HandleMessage   data: " << message << std::endl;
+    // std::cout << "HandleMessage   data: " << message << std::endl;
     // 将运算结果返回给客户端
 
 
@@ -69,8 +81,26 @@ void EchoServer::HandleMessage(Connection *connection, std::string& message){
     // //send(connection->fd(),tmpbuf.data(),tmpbuf.size(),0);   // 把临时缓冲区中的数据直接send()出去。
     // connection->send(tmpbuf.data(),tmpbuf.size());   // 把临时缓冲区中的数据直接send()出去。
 
+    // connection->send(message.data(),message.size());
+
+    // 把业务放到 线程池 的任务队列中
+    threadPool_.addTask(
+        std::bind(&EchoServer::OnMessage, this, connection, message)
+    );
+
+};
+
+
+void EchoServer::OnMessage(Connection *connection, std::string& message){
+
+    message = " server echo " + message;
     connection->send(message.data(),message.size());
-};     
+}
+
+
+
+
+
 // 数据发送完成后，在TcpServer类中回调此函数。
 void EchoServer::HandleSendComplete(Connection *connection){
     std::cout << "Message send complete." << std::endl;

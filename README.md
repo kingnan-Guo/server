@@ -162,6 +162,20 @@ Connection 类： Reactor_13_add_Connection_class
 
 
 
+2025/01/04   11:20
+增加工作线程： Reactor_27_add_work_thread
+     1、Acceptor 运行在 Reactor 主进程中
+     2、Connection 运行在 Reactor 从线程 （线程池）中
+     3、一个从 Reactor 负责多个 Connection，每个Connection 的 工作内容包括 IO 计算 （处理业务）， IO不会阻塞事件循环，但是，计算可能会阻塞事件循环； 如果 计算阻塞了事件循，那么 在同一个 Reactor 中的全部 Connection 将会 被阻塞; 所以，把计算放到工作线程中运行;工作线程不会阻塞事件循环，因为工作线程是异步的，不会阻塞事件循环 ， 从 Reactor  Connection  只负责 IO
+
+     4、 业务处理在 EchoServer 中， 所以 工作线程池也要在 EchoServer 中创建， 在处理任务的时候要将 处理任务 传给 threadPool_，逻辑 在工作线程中运行
+
+
+     我的问题是  Connection 和 工作线程都是 从线程，为什么 Connection 会导致阻塞，但是  工作线程 不会阻塞？？？？？？？
+
+
+     一个进程可以有多个线程，它们共享进程的资源（如内存），但彼此独立执行。
+
 
 
 

@@ -1,13 +1,13 @@
 #include "ThreadPool.h"
 
-ThreadPool::ThreadPool(size_t threadNum):stop_(false)
+ThreadPool::ThreadPool(size_t threadNum, const std::string& threadType):stop_(false), threadType_(threadType)
 {
     for (size_t i = 0; i < threadNum; ++i)
     {
         threads_.emplace_back([this]{
 
-            printf("create thread ( %d) \r\n", syscall(SYS_gettid));
-            printf("子线程 thread id:%lu\n",std::this_thread::get_id());
+            printf("create %s thread ( %d ) \r\n" , threadType_.c_str(), syscall(SYS_gettid));
+            // printf("子线程 thread id:%lu\n",std::this_thread::get_id());
 
             while (stop_ == false)
             {
@@ -40,7 +40,7 @@ ThreadPool::ThreadPool(size_t threadNum):stop_(false)
 
                 } /// 锁作用域的结束。
 
-                printf("thread is %d.\n",syscall(SYS_gettid));
+                printf("%s execute task  %d \n", threadType_.c_str() ,syscall(SYS_gettid));
                 // 执行出队的任务
                 task();
 
