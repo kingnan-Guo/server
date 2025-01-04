@@ -4,11 +4,12 @@
  * 这里是 处理与 客户端 通信的类 ，对端发送过来数据。传给 onMessage
  * 
  */
-Connection::Connection(EventLoop* loop, std::unique_ptr<Socket> clientsock): loop_(loop), clientScoket_(std::move(clientsock)),disConnect_(false)
+// Connection::Connection(EventLoop* loop, std::unique_ptr<Socket> clientsock): loop_(loop), clientScoket_(std::move(clientsock)), disConnect_(false), clientChannel_(new Channel(loop_, clientScoket_->fd()))
+Connection::Connection(const std::unique_ptr<EventLoop>& loop, std::unique_ptr<Socket> clientsock): loop_(loop), clientScoket_(std::move(clientsock)), disConnect_(false), clientChannel_(new Channel(loop_, clientScoket_->fd()))
 {
     // // 创建Channel对象，并添加到epoll中。
     // Channel* clientChannel = new Channel(ep_, clientSock->fd());
-    clientChannel_ = new Channel(loop_, clientScoket_->fd());
+    // clientChannel_ = new Channel(loop_, clientScoket_->fd());
 
 
     // clientChannel_->setReadCallback(
@@ -43,7 +44,7 @@ Connection::Connection(EventLoop* loop, std::unique_ptr<Socket> clientsock): loo
 Connection::~Connection()
 {
     // delete clientScoket_; //
-    delete clientChannel_;
+    // delete clientChannel_;
     printf("Connection对象已析构。\n");
 }
 

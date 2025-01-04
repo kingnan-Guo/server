@@ -13,15 +13,20 @@ EventLoop::EventLoop():ep_(new Epoll)
 // 删除 ep_
 EventLoop::~EventLoop()
 {
-    delete ep_;
+    // delete ep_;
 }
 
 
 
 // 返回epoll对象
+// Epoll* EventLoop::ep()
+// {
+//     return ep_;
+// }
+
 Epoll* EventLoop::ep()
 {
-    return ep_;
+    return ep_.get();
 }
 
 

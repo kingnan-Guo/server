@@ -11,24 +11,25 @@
 #include "Connection.h"
 
 #include "ThreadPool.h"
-
+#include <memory>// 使用只能指针 
 
 // 网络服务类 
 class TcpServer{
     private:
         //EventLoop* mainLoop_; // 主事件循环；堆内存。    之前 不使用置针的时候 是 栈内存 ;   一个 Tcp Server可以有多个事件循环，现在是单线程，暂时只用一个事件循环
-        EventLoop* mainLoop_; // 主事件循环；堆内存。 裸指针 原始指针 改为 
+        std::unique_ptr<EventLoop> mainLoop_; // 主事件循环；堆内存。 裸指针 原始指针 改为 
 
 
         
-        std::vector<EventLoop*> subLoop_; // 存放 子事件循环 的容器 ；堆内存
+        // std::vector<EventLoop*> subLoop_; // 存放 子事件循环 的容器 ；堆内存
+        std::vector<std::unique_ptr<EventLoop>> subLoop_; // 存放 子事件循环 的容器 ；堆内存
         
         
-        Acceptor* acceptor_; // 一个 Tcp Server 只有 一个  Acceptor 对象
+        Acceptor acceptor_; // 一个 Tcp Server 只有 一个  Acceptor 对象
 
-        ThreadPool* threadPool_; // 一个 Tcp Server 有一个线程池
+
         int threadNum_; //线程池大小， 即 从事件循环的个数， 线程池中线程的数量
-
+        ThreadPool threadPool_; // 一个 Tcp Server 有一个线程池
 
 
 

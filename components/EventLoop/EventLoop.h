@@ -1,6 +1,7 @@
 #pragma once
 #include "Epoll.h"
 #include <functional>
+#include <memory>// 使用只能指针 
 /**
  *  每个 事件循环里肯定有一个 epoll 
  */
@@ -12,7 +13,8 @@ class Epoll;
 class EventLoop
 {
     private:
-        Epoll * ep_;
+        // Epoll * ep_;    // 一个网络服务中 最多有十几个 事件循环， 所以 epoll 使用 栈内存 没有问题
+        std::unique_ptr<Epoll> ep_;                       // 每个事件循环只有一个Epoll。
         std::function<void(EventLoop*)> epollTimeOutCallBack_;  // TCP 连接 关闭 断开 的 回调函数， 供 Channel 回调
     public:
         EventLoop();

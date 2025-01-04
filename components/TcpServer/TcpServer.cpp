@@ -1,7 +1,9 @@
 #include "TcpServer.h"
 
 
-TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum): threadNum_(threadNum){
+TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum): 
+threadNum_(threadNum), mainLoop_(new EventLoop()), acceptor_(mainLoop_, ip, port), threadPool_(threadNum_, "IO")
+{
 
     /*
     // Socket serverScoket(createnonblocking()); 不能使用这个 ，因为 离开 TcpServer 后 会调用  ~Socket() ，会关闭fd，导致epoll监听失败。 所以使用下面的 
@@ -52,8 +54,13 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum):
     servChannel->enableReading();
 
     */
-    // 创建一个 EventLoop 对象
-    mainLoop_ = new EventLoop();
+
+
+    // // 创建一个 EventLoop 对象
+    // mainLoop_ = new EventLoop();
+
+
+
     // 设置 超时 回调函数
     mainLoop_->setEpollTimeOutCallBack(
         std::bind(&TcpServer::epollTimeOut, this, std::placeholders::_1)
@@ -61,10 +68,11 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum):
 
 
 
-    acceptor_ = new Acceptor(mainLoop_, ip, port);
+    // acceptor_ = new Acceptor(mainLoop_, ip, port);
+    // acceptor_ = new Acceptor(mainLoop_, ip, port); // mainLoop_.get() 获取普通指针
 
     // 设置 回调函数
-    acceptor_->setNewConnectionCallback(
+    acceptor_.setNewConnectionCallback(
         // std::placeholders::_1 
         // 回调函数，当有新的客户端连接时，此函数会被调用。
         // @param &TcpServer::newConnection       TcpServer对象中的成员函数。
@@ -75,19 +83,25 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum):
 
 
 
-    // 创建线程池
-    threadPool_ = new ThreadPool(threadNum_, "IO");
+    // // 创建线程池
+    // threadPool_ = new ThreadPool(threadNum_, "IO");
     
     // 创建从事件 循环
     for(int i = 0; i < threadNum_; i++){
         // 创建一个 EventLoop 对象,放入到 subLoop_ 容器 中
-        subLoop_.push_back(new EventLoop());
+        // subLoop_.push_back(new EventLoop());
+        subLoop_.emplace_back(new EventLoop());
+
+
+
+
         subLoop_[i]->setEpollTimeOutCallBack(
             std::bind(&TcpServer::epollTimeOut, this, std::placeholders::_1)
         );
         // 把 EventLoop 的 run（） 作为任务 添加给 线程池， 线程池中的线程运行这个任务， 就可以运行事件循环了
-        threadPool_->addTask(
-            std::bind(&EventLoop::run, subLoop_[i])
+        threadPool_.addTask(
+            // std::bind(&EventLoop::run, subLoop_[i])
+            std::bind(&EventLoop::run, subLoop_[i].get()) //这里需要偶 普通的指针
         );
 
     }
@@ -99,8 +113,8 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum):
 
 
 TcpServer::~TcpServer(){
-    delete acceptor_;
-    delete mainLoop_;
+    // delete acceptor_;
+    // delete mainLoop_;
 
     // 在析构函数 中 释放所有 connections_ 内的  fd 这段是 AI 写的 
     // for (auto it = connections_.begin(); it != connections_.end(); it++){
@@ -117,12 +131,14 @@ TcpServer::~TcpServer(){
     }
     */
 
-    // 在析构函数 中 释放所有 subLoop_ 内的  fd
-    for (auto &fd:subLoop_)
-    {
-        delete fd;
-    }
-    delete threadPool_;
+    // // 在析构函数 中 释放所有 subLoop_ 内的  fd
+    // for (auto &fd:subLoop_)
+    // {
+    //     delete fd;
+    // }
+
+    
+    // delete threadPool_;
 
 };
 
