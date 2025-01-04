@@ -4,7 +4,7 @@
  * 这里是 处理与 客户端 通信的类 ，对端发送过来数据。传给 onMessage
  * 
  */
-Connection::Connection(EventLoop* loop, Socket* clientsock): loop_(loop), clientScoket_(clientsock)
+Connection::Connection(EventLoop* loop, Socket* clientsock): loop_(loop), clientScoket_(clientsock),disConnect_(false)
 {
     // // 创建Channel对象，并添加到epoll中。
     // Channel* clientChannel = new Channel(ep_, clientSock->fd());
@@ -34,7 +34,7 @@ Connection::Connection(EventLoop* loop, Socket* clientsock): loop_(loop), client
 
 
     // 客户端采用边缘触发
-    clientChannel_->useEt(); // 暂时 注掉 变成水平触发， 这样 EPOLLOUT 会触发很多次
+    // clientChannel_->useEt(); // 暂时 注掉 变成水平触发， 这样 EPOLLOUT 会触发很多次
     clientChannel_->enableReading();
 }
 
@@ -44,6 +44,7 @@ Connection::~Connection()
 {
     delete clientScoket_; //
     delete clientChannel_;
+    printf("Connection对象已析构。\n");
 }
 
 
@@ -65,11 +66,17 @@ uint16_t Connection::port() const{
 // TCP 连接 关闭 断开 的 回调函数， 供 Channel 回调
 void Connection::closeCallBack(){
     // printf("1client(eventfd=%d) disconnected.\n", fd());
-    // close(fd());     
+    // close(fd());
+
+    disConnect_ = true;
+
+    // 要从 tcp 循环中删除 channel
+    clientChannel_->remove(); // 关闭读、写事件
 
     // 在 TcpServer 中，关闭连接，并删除 Channel
     if(closeCallBack_){
-        closeCallBack_(this); // 回调TcpServer::closeconnection()。
+        // closeCallBack_(this()); // 回调TcpServer::closeconnection()。
+        closeCallBack_(shared_from_this()); // 回调TcpServer::closeconnection()。
     }
 };
 
@@ -77,8 +84,13 @@ void Connection::closeCallBack(){
 void Connection::errorCallBack(){
     // printf("3client(eventfd=%d) error.\n", fd());
     // close(fd());            // 关闭客户端的fd。
+
+    // 要从 tcp 循环中删除 channel
+    clientChannel_->remove(); // 关闭读、写事件
+
     if(errorCallBack_){
-        errorCallBack_(this); // 回调TcpServer::errorconnection()。
+        // errorCallBack_(this()); // 回调TcpServer::errorconnection()。
+        errorCallBack_(shared_from_this()); // 回调TcpServer::errorconnection()。
     }
 };
 
@@ -87,20 +99,20 @@ void Connection::errorCallBack(){
 
 
 // 设置 回调函数
-void Connection::setCloseCallBack(std::function<void(Connection*)> closeCallBack){
+void Connection::setCloseCallBack(std::function<void(spConnection)> closeCallBack){
     closeCallBack_ = closeCallBack;
 };
 
-void Connection::setErrorCallBack(std::function<void(Connection*)> errorCallBack){
+void Connection::setErrorCallBack(std::function<void(spConnection)> errorCallBack){
     errorCallBack_ = errorCallBack;
 };
 
 // 设置 回调函数 处理 message
-void Connection::setOnMessageCallBack(std::function<void(Connection*, std::string&)> onMessageCallBack){
+void Connection::setOnMessageCallBack(std::function<void(spConnection, std::string&)> onMessageCallBack){
     onMessageCallBack_ = onMessageCallBack;
 };
 
-void Connection::setSendCompletionCallback(std::function<void(Connection*)> sendCompletionCallback){
+void Connection::setSendCompletionCallback(std::function<void(spConnection)> sendCompletionCallback){
      sendCompletionCallback_ = sendCompletionCallback;
 }
 
@@ -160,7 +172,9 @@ void Connection::onMessage(){
 
                 // std::string message = inputBuffer_.data();
                 // printf("message (eventfd=%d):%s\n", fd(), message.data());
-                onMessageCallBack_(this, message); // 回调TcpServer::onMessage()。
+                
+                // onMessageCallBack_(this(), message); // 回调TcpServer::onMessage()。
+                onMessageCallBack_(shared_from_this(), message); // 回调TcpServer::onMessage()。
 
                 // send(
                 //     fd(), inputBuffer_.data(), inputBuffer_.size(), 0
@@ -178,6 +192,10 @@ void Connection::onMessage(){
             close(fd_);            // 关闭客户端的fd。
             */
 
+
+
+
+            disConnect_ = true;
             // 调用 回调函数
             closeCallBack();
             break;
@@ -189,6 +207,12 @@ void Connection::onMessage(){
 // 发送数据。
 void Connection::send(const char *data,size_t size)        
 {
+
+    if(disConnect_ == true){
+        printf("客户端已经断开了  send直接返回 \n");
+        return;
+    }
+
     // outputBuffer_.append(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
     outputBuffer_.appendWithHearder(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
 
@@ -212,6 +236,8 @@ void Connection::writeCallBack(){
         // 如果缓存区为空，则关闭写事件
         clientChannel_->disablewriting();
         // 数据发送完成之后调用 回调函数
-        sendCompletionCallback_(this);
+        // sendCompletionCallback_(this);
+        sendCompletionCallback_(shared_from_this());
+        
     }
 };  

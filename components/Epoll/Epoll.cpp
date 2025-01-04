@@ -64,7 +64,17 @@ void Epoll::updateChannel(Channel* ch){
 
 }
 
+void Epoll::removeChannel(Channel* ch){
 
+    // 如果已经添加过，则 删除 。
+    if(ch->inEpoll()){
+        // EPOLL_CTL_MOD 修改监听事件
+        if(epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, ch->fd(), 0) == -1){
+            printf("epoll_ctl update fail\n");
+            exit(1);
+        }
+    }
+}
 
 
 

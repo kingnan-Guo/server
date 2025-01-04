@@ -29,7 +29,7 @@ class Epoll
         // 把 channel 添加 或 更新到 红黑树上， Channel 中有哦 fd ， 也需要监视的事件
         void updateChannel(Channel* ch); // 更新文件描述符的事件
 
-
+        void removeChannel(Channel *ch);                      // 把channel从红黑树上移除
 
         // 在这个函数中增加 成员函数 ，在这个函数中 运行 epoll_wait， 等待事件的发生, 已经发生的事件 用 vector 返回
         // std::vector<epoll_event> loop(int timeout = -1);

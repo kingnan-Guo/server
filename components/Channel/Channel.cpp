@@ -49,6 +49,19 @@ void Channel::disableReading(){
     loop_->updateChannel(this);
 };
 
+// 取消所有事件
+void Channel::disableAll(){
+    events_ = 0;
+    loop_->updateChannel(this);
+};                          // 取消所有事件
+// 从 事件循环中删除 channel ， 也就是 从 epoll 中删除 channel？？
+void Channel::remove(){
+    disableAll();               // 取消所有事件 可有可无
+    loop_->removeChannel(this); // 从红黑树上删除 fd
+}; 
+
+
+
 // 注册写事件。
 void Channel::enablewriting(){
     events_|=EPOLLOUT;
@@ -105,7 +118,7 @@ void Channel::handleEvent(){
             
             */
 
-           printf("EPOLLRDHUP \n");
+           printf("handleEvent EPOLLRDHUP \n");
            closeCallBack_();
 
 
@@ -118,7 +131,7 @@ void Channel::handleEvent(){
         else if (revents_ & (EPOLLIN | EPOLLPRI))   // 接收缓冲区中有数据可以读。
         {
 
-            printf("EPOLLIN | EPOLLPRI \n");
+            printf("handleEvent  EPOLLIN | EPOLLPRI \n");
             readCallback_();
 
             
@@ -126,7 +139,7 @@ void Channel::handleEvent(){
 
         else if (revents_ & EPOLLOUT) // 有数据需要写，暂时没有代码，以后再说。
         {
-            printf("EPOLLOUT \n");
+            printf("handleEvent EPOLLOUT \n");
             writeCallback_(); // 调 用回调函数 ， connection 类中定义的回调函数
 
         }
@@ -139,7 +152,7 @@ void Channel::handleEvent(){
             
             */
 
-
+            printf("handleEvent OTHERS \n");
 
             errorCallBack_();
 

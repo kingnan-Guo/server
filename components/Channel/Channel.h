@@ -45,6 +45,9 @@ class Channel {
         void enablewriting();                      // 注册写事件。
         void disablewriting();                     // 取消写事件。
 
+        void disableAll();                          // 取消所有事件
+        void remove(); // 从 事件循环中删除 channel ， 也就是 从 epoll 中删除 channel？？
+
 
         void setInEpoll(bool inEpoll = true); // 设置 channel 是否在 epoll 中; 默认 把成员变量设置为 true
         bool inEpoll(); // 返回 channel 是否在 epoll 中

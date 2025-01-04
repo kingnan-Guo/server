@@ -49,23 +49,23 @@ void EchoServer::Start(){
 };
 
  // 处理新客户端连接请求，在TcpServer类中回调此函数。
-void EchoServer::HandleNewConnection(Connection* connection){
+void EchoServer::HandleNewConnection(spConnection connection){
     // std::cout << "New Connection Come in." << std::endl;
     std::cout << "New Connection Come in. HandleNewConnection   thread id : " << syscall(SYS_gettid) << std::endl;
 };
 
                 // 关闭客户端的连接，在TcpServer类中回调此函数。 
-void EchoServer::HandleClose(Connection *connection){
+void EchoServer::HandleClose(spConnection connection){
     std::cout << "EchoServer conn closed." << std::endl;
 };
 
  // 客户端的连接错误，在TcpServer类中回调此函数。
-void EchoServer::HandleError(Connection *connection){
+void EchoServer::HandleError(spConnection connection){
     std::cout << "EchoServer conn error." << std::endl;
 };     
 
 // 处理客户端的请求报文，在TcpServer类中回调此函数。
-void EchoServer::HandleMessage(Connection *connection, std::string& message){
+void EchoServer::HandleMessage(spConnection connection, std::string& message){
 
 
     std::cout << "HandleMessage   thread id : " << syscall(SYS_gettid) << " message : " << message << std::endl;
@@ -91,8 +91,9 @@ void EchoServer::HandleMessage(Connection *connection, std::string& message){
 };
 
 
-void EchoServer::OnMessage(Connection *connection, std::string& message){
-
+void EchoServer::OnMessage(spConnection connection, std::string& message){
+    sleep(2);
+    std::cout << "OnMessage 处理业务完成  要调用 connection " << message << std::endl;
     message = " server echo " + message;
     connection->send(message.data(),message.size());
 }
@@ -102,7 +103,7 @@ void EchoServer::OnMessage(Connection *connection, std::string& message){
 
 
 // 数据发送完成后，在TcpServer类中回调此函数。
-void EchoServer::HandleSendComplete(Connection *connection){
+void EchoServer::HandleSendComplete(spConnection connection){
     std::cout << "Message send complete." << std::endl;
 };     
 // epoll_wait()超时，在TcpServer类中回调此函数。   

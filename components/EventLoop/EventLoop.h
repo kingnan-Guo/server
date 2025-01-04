@@ -29,6 +29,8 @@ class EventLoop
 
         // epollTimeOutCallBack_
         void setEpollTimeOutCallBack(std::function<void(EventLoop*)> cb);
+
+        void removeChannel(Channel *ch);                      // 把channel从红黑树上移除
 };
 
 

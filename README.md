@@ -199,7 +199,25 @@ Connection 类： Reactor_13_add_Connection_class
 
 
 
+2025/01/04   14: 30
+使用智能shader_ptr指针管理资源：   Reactor_29_use_smart_ptr_to_manage_resource
+     1、定义 定义别名 using spConnection = std::shared_ptr<Connection>; 把 普通的 指针 Connection* 改为 智能指针
+     2、会报错，是因为  std::function<void(spConnection)> closeCallBack_; 在使用的时候 Connection 还未定义， 所以在 using 前先定义  class Connection; 
+     3、 Connection.cpp 中的callBack 函数 传入的  this 会报错，因为 this是 普通指针，所以 要改成智能指针， C++ 提供一个方法 把 class Connection 继承 std::enable_shared_from_this<Connection>，然后 this 指针 改为  shared_from_this() 就可以了 ,    例如： sendCompletionCallback_(this); 改为   sendCompletionCallback_(shared_from_this());
+     4、TcpServer.h  的 Connection*  改为 spConnection ;
+     5、TcpServer.cpp 中的  Connection*  改为 spConnection;
+           a、Connection* connection = new Connection(subLoop_[clinetSocket->fd() % threadNum_], clinetSocket);  改为  spConnection connection(new Connection(subLoop_[clinetSocket->fd() % threadNum_], clinetSocket));
+          b、void TcpServer::closeConnection(Connection* connection) 改为 void TcpServer::closeConnection(spConnection connection)
+          c、去掉 for (auto &fd:connections_)  {      delete fd.second;  }
 
+     6、 客户端断开连接的时候 connection 不会被 析构， 只有在处理完成后才会被析构 
+     7、 void TcpServer::closeConnection(spConnection connection) 中的 close(connection->fd());   关闭 客户端  fd ;  也要注掉 
+     8、 void TcpServer::errorConnection(spConnection connection) 中的 close(connection->fd());   关闭 客户端  fd ;  也要注掉
+
+     9、 如果tcpSever 断开，那么不再需要 在工作线程中调用 send ，取消关注 channel 全部的事件，从epoll 中删除；并且从事件循环中删除
+     
+     10、当前是 水平触发 // clientChannel_->useEt(); // 暂时 注掉 变成水平触发， 这样 EPOLLOUT 会触发很多次 之后会改回来
+   
 
 
 

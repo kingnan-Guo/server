@@ -106,11 +106,16 @@ TcpServer::~TcpServer(){
     // for (auto it = connections_.begin(); it != connections_.end(); it++){
     //     delete it->second;
     // }
+
+    
+    /*
+    // 这个时候 是智能指针 系统会 自动 释放
     // 在析构函数 中 释放所有 connections_ 内的  fd
     for (auto &fd:connections_)
     {
         delete fd.second;
     }
+    */
 
     // 在析构函数 中 释放所有 subLoop_ 内的  fd
     for (auto &fd:subLoop_)
@@ -138,7 +143,9 @@ void TcpServer::newConnection(Socket* clinetSocket){
     //Connection* connection = new Connection(mainLoop_, clinetSocket); // 这里new 出的对象没有释放
 
     // 把 客户端的fd 分配给 线程池 中的线程
-    Connection* connection = new Connection(subLoop_[clinetSocket->fd() % threadNum_], clinetSocket); // 这里new 出的对象没有释放
+    // Connection* connection = new Connection(subLoop_[clinetSocket->fd() % threadNum_], clinetSocket); // 这里new 出的对象没有释放
+    spConnection connection(new Connection(subLoop_[clinetSocket->fd() % threadNum_], clinetSocket ));
+
 
     connection->setCloseCallBack(
         // 回调函数，当客户端断开连接时，此函数会被调用。
@@ -180,7 +187,8 @@ void TcpServer::newConnection(Socket* clinetSocket){
 }
 
 // 关闭客户端的连接，在 Connection 类中 回调词函数
-void TcpServer::closeConnection(Connection* connection){
+// void TcpServer::closeConnection(Connection* connection){
+void TcpServer::closeConnection(spConnection connection){
 
     if(closeConnectionCallBack_){
         closeConnectionCallBack_(connection);
@@ -188,28 +196,28 @@ void TcpServer::closeConnection(Connection* connection){
 
 
     printf("client ( eventfd = %d ) disconnected.\n", connection->fd());
-    close(connection->fd());                // 关闭 客户端  fd
+    // close(connection->fd());                // 关闭 客户端  fd ; 
     connections_.erase(connection->fd());       // 在 connections_ 中删除 connection 对象
-    delete connection;
+    // delete connection;
 
 };
 
 // 客户端连接的错误， 在 Connection 回调 此函数
-void TcpServer::errorConnection(Connection* connection){
+void TcpServer::errorConnection(spConnection connection){
     if(errorConnectionCallBack_){
         errorConnectionCallBack_(connection);
     }
 
 
     printf("client ( eventfd = %d ) error.\n", connection->fd());
-    close(connection->fd());
+    // close(connection->fd());
     connections_.erase(connection->fd());       // 在 connections_ 中删除 connection 对象
-    delete connection;
+    // delete connection;
 };
 
 
 // 收到数据后的处理过程， 在 Connection 类中 回调此函数
-void TcpServer::onMessage(Connection* connection, std::string& message){
+void TcpServer::onMessage(spConnection connection, std::string& message){
     
     // printf("client ( eventfd = %d ) message: %s\n", connection->fd(), message.c_str());
     /*
@@ -233,7 +241,7 @@ void TcpServer::onMessage(Connection* connection, std::string& message){
 
 }
 
-void TcpServer::sendCompletionCallback(Connection* connection){
+void TcpServer::sendCompletionCallback(spConnection connection){
     printf("send completion callback.\n");
     if (sendCompleteCallBack_)
     {
@@ -253,23 +261,23 @@ void TcpServer::epollTimeOut(EventLoop * loop){
 
 
 
-void TcpServer::setNewConnectionCallBack(std::function<void(Connection*)> newConnectionCallBack){
+void TcpServer::setNewConnectionCallBack(std::function<void(spConnection)> newConnectionCallBack){
     newConnectionCallBack_ = newConnectionCallBack;
 };
 
-void TcpServer::setCloseConnectionCallBack(std::function<void(Connection*)> closeConnectionCallBack){
+void TcpServer::setCloseConnectionCallBack(std::function<void(spConnection)> closeConnectionCallBack){
     closeConnectionCallBack_ = closeConnectionCallBack;
 };
 
-void TcpServer::setErrorConnectionCallBack(std::function<void(Connection*)> errorConnectionCallBack){
+void TcpServer::setErrorConnectionCallBack(std::function<void(spConnection)> errorConnectionCallBack){
     errorConnectionCallBack_ = errorConnectionCallBack;
 };
 
-void TcpServer::setOnMessageCallBack(std::function<void(Connection*,std::string &message)> onMessageCallBack){
+void TcpServer::setOnMessageCallBack(std::function<void(spConnection,std::string &message)> onMessageCallBack){
     onMessageCallBack_ = onMessageCallBack;
 };
 
-void TcpServer::setSendCompleteCallBack(std::function<void(Connection*)> sendCompleteCallBack){
+void TcpServer::setSendCompleteCallBack(std::function<void(spConnection)> sendCompleteCallBack){
     sendCompleteCallBack_ = sendCompleteCallBack;
 };
 
