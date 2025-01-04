@@ -217,6 +217,13 @@ Connection 类： Reactor_13_add_Connection_class
      9、 如果tcpSever 断开，那么不再需要 在工作线程中调用 send ，取消关注 channel 全部的事件，从epoll 中删除；并且从事件循环中删除
      
      10、当前是 水平触发 // clientChannel_->useEt(); // 暂时 注掉 变成水平触发， 这样 EPOLLOUT 会触发很多次 之后会改回来
+
+
+
+2025/01/04   17: 30
+继续使用只能指针之 用 uniqueue_ptr 管理自己的资源：   Reactor_30_use_unique_ptr_to_manage_resource
+     1、要把 裸指针 改为 std::unique_ptr
+     
    
 
 

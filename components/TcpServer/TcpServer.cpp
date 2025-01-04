@@ -138,13 +138,13 @@ void TcpServer::start(){
 // ==========
 
 // 处理 客户端的连接请求
-void TcpServer::newConnection(Socket* clinetSocket){
+void TcpServer::newConnection(std::unique_ptr<Socket> clinetSocket){
 
     //Connection* connection = new Connection(mainLoop_, clinetSocket); // 这里new 出的对象没有释放
 
     // 把 客户端的fd 分配给 线程池 中的线程
     // Connection* connection = new Connection(subLoop_[clinetSocket->fd() % threadNum_], clinetSocket); // 这里new 出的对象没有释放
-    spConnection connection(new Connection(subLoop_[clinetSocket->fd() % threadNum_], clinetSocket ));
+    spConnection connection(new Connection(subLoop_[clinetSocket->fd() % threadNum_], std::move(clinetSocket) ));
 
 
     connection->setCloseCallBack(

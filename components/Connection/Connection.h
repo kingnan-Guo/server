@@ -18,7 +18,9 @@ class Connection:public std::enable_shared_from_this<Connection>
     private:
         
         EventLoop* loop_;    // Connection 对应的事件循环， 在构造函数中传入, 从外面传过来的 
-        Socket* clientScoket_;  // 与 客户端 通信 的 socket； 虽然 是传入进来的值 ，但是 属于 Connection 的成员变量，所以 需要在析构函数中删除 
+        // Socket* clientScoket_;  // 与 客户端 通信 的 socket； 虽然 是传入进来的值 ，但是 属于 Connection 的成员变量，所以 需要在析构函数中删除 
+        std::unique_ptr<Socket> clientScoket_;
+
         Channel* clientChannel_;  // Connection 对应的 的 channel ，在构造函数中创建
 
         // 添加回调函数
@@ -34,7 +36,8 @@ class Connection:public std::enable_shared_from_this<Connection>
         std::atomic_bool disConnect_;  // 客户端 连接是否已经断开，如果断开，则设为 true； 在 IO 线程中会改变这个值，在工作线程中会 读取 判断这个值 ，所以需要使用原子变量
 
     public:
-        Connection(EventLoop* loop, Socket* clientScoket);
+        // Connection(EventLoop* loop, Socket* clientScoket);
+        Connection(EventLoop* loop, std::unique_ptr<Socket> clientScoket);
         ~Connection();
 
 

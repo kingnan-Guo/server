@@ -1,29 +1,33 @@
 #include "Acceptor.h"
 
-Acceptor::Acceptor(EventLoop* loop, const std::string &ip, uint16_t port): loop_(loop)
+Acceptor::Acceptor(EventLoop* loop, const std::string &ip, uint16_t port): loop_(loop), serverScoket_(createnonblocking()), acceptChannel_(loop_, serverScoket_.fd())
 {
     
 
 
     // Socket serverScoket(createnonblocking()); 不能使用这个 ，因为 离开 TcpServer 后 会调用  ~Socket() ，会关闭fd，导致epoll监听失败。 所以使用下面的 
-    serverScoket_ = new Socket(createnonblocking()); // 
-    Socket * serverScoket = serverScoket_;
+    //serverScoket_ = new Socket(createnonblocking()); // 
+
+
+
+
+
 
     InetAddress servaddr(ip, port);
 
-    serverScoket->setreuseaddr(true);
-    serverScoket->settcpnodelay(true);
-    serverScoket->setreuseport(true);
-    serverScoket->setkeepalive(true);
+    serverScoket_.setreuseaddr(true);
+    serverScoket_.settcpnodelay(true);
+    serverScoket_.setreuseport(true);
+    serverScoket_.setkeepalive(true);
 
-    serverScoket->bind(servaddr);
-    serverScoket->listen();
+    serverScoket_.bind(servaddr);
+    serverScoket_.listen();
 
     //---------------
 
 
-    // 创建服务端用于监听的listenfd。
-    int listenfd = serverScoket->fd();
+    // // 创建服务端用于监听的listenfd。
+    // int listenfd = serverScoket.fd();
 
 
     // // 创建epoll句柄（红黑树）。
@@ -34,7 +38,7 @@ Acceptor::Acceptor(EventLoop* loop, const std::string &ip, uint16_t port): loop_
 
     // EventLoop eLoop;
     // Channel* servChannel = new Channel(eLoop.ep(), listenfd);// 这里new出来的对象没有释放，这个问题以后再解决。
-    acceptChannel_ = new Channel(loop_, listenfd);
+    // acceptChannel_ = new Channel(loop_, listenfd);
 
 
     // 指定回调函数 
@@ -48,7 +52,7 @@ Acceptor::Acceptor(EventLoop* loop, const std::string &ip, uint16_t port): loop_
     //     std::bind(&Channel::newConnection, acceptChannel_, serverScoket) // 绑定函数
     // );
 
-    acceptChannel_->setReadCallback(
+    acceptChannel_.setReadCallback(
         // 
         // 回调函数，当有新的客户端连接时，此函数会被调用。
         // @param &Acceptor::newConnection       成员函数，也就是要调用的函数
@@ -61,15 +65,15 @@ Acceptor::Acceptor(EventLoop* loop, const std::string &ip, uint16_t port): loop_
 
 
     // 启用 读事件
-    acceptChannel_->enableReading();
+    acceptChannel_.enableReading();
 
 
 }
 
 Acceptor::~Acceptor()
 {
-    delete serverScoket_;
-    delete acceptChannel_;
+    // delete serverScoket_;
+    // delete acceptChannel_;
 }
 
 
@@ -78,12 +82,13 @@ Acceptor::~Acceptor()
 
 
 //==========================    =========================================
-#include "Connection.h"
+// #include "Connection.h"
 // 将 客户端连上来 和  连接的客户端的fd有事件 封装成 回调函数
 // 处理新客户端连接请求
 void Acceptor::newConnection(){
     InetAddress clientaddr;    
-    Socket* clientSock = new Socket(serverScoket_->accept(clientaddr));
+    // Socket* clientSock = new Socket(serverScoket_.accept(clientaddr));
+    std::unique_ptr<Socket> clientSock(new Socket(serverScoket_.accept(clientaddr))); // 智能指针
 
     // printf ("accept client(fd=%d, ip=%s, port=%d ) ok.\n", clientSock->fd(), clientaddr.ip(), clientaddr.port());
 
@@ -119,7 +124,7 @@ void Acceptor::newConnection(){
    // Connection* connection = new Connection(loop_, clientSock);
 
     // 回调TcpServer::newconnection() ,替换 上面 两行
-    newConnectionCallback_(clientSock);
+    newConnectionCallback_(std::move(clientSock)); // std::move(clientSock)  将智能指针 转换为右值引用，从而调用移动构造函数，将资源所有权转移给 newConnectionCallback_ 函数的参数
 
 
 }; 
@@ -127,7 +132,7 @@ void Acceptor::newConnection(){
 
 
  // 设置处理新客户端 连接请求的。回调函数，
-void Acceptor::setNewConnectionCallback(std::function<void(Socket*)> callback){
+void Acceptor::setNewConnectionCallback(std::function<void (std::unique_ptr<Socket>)> callback){
     newConnectionCallback_ = callback;
 }
 

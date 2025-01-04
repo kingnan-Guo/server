@@ -4,7 +4,7 @@
  * 这里是 处理与 客户端 通信的类 ，对端发送过来数据。传给 onMessage
  * 
  */
-Connection::Connection(EventLoop* loop, Socket* clientsock): loop_(loop), clientScoket_(clientsock),disConnect_(false)
+Connection::Connection(EventLoop* loop, std::unique_ptr<Socket> clientsock): loop_(loop), clientScoket_(std::move(clientsock)),disConnect_(false)
 {
     // // 创建Channel对象，并添加到epoll中。
     // Channel* clientChannel = new Channel(ep_, clientSock->fd());
@@ -34,7 +34,7 @@ Connection::Connection(EventLoop* loop, Socket* clientsock): loop_(loop), client
 
 
     // 客户端采用边缘触发
-    // clientChannel_->useEt(); // 暂时 注掉 变成水平触发， 这样 EPOLLOUT 会触发很多次
+    clientChannel_->useEt(); // 暂时 注掉 变成水平触发， 这样 EPOLLOUT 会触发很多次
     clientChannel_->enableReading();
 }
 
@@ -42,7 +42,7 @@ Connection::Connection(EventLoop* loop, Socket* clientsock): loop_(loop), client
 // 
 Connection::~Connection()
 {
-    delete clientScoket_; //
+    // delete clientScoket_; //
     delete clientChannel_;
     printf("Connection对象已析构。\n");
 }

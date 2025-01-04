@@ -16,7 +16,10 @@
 // 网络服务类 
 class TcpServer{
     private:
-        EventLoop* mainLoop_; // 主事件循环；堆内存。 之前 不使用置针的时候 是 栈内存    一个 Tcp Server可以有多个事件循环，现在是单线程，暂时只用一个事件循环
+        //EventLoop* mainLoop_; // 主事件循环；堆内存。    之前 不使用置针的时候 是 栈内存 ;   一个 Tcp Server可以有多个事件循环，现在是单线程，暂时只用一个事件循环
+        EventLoop* mainLoop_; // 主事件循环；堆内存。 裸指针 原始指针 改为 
+
+
         
         std::vector<EventLoop*> subLoop_; // 存放 子事件循环 的容器 ；堆内存
         
@@ -47,7 +50,7 @@ class TcpServer{
 
         // 运行时间循环
         void start();
-        void newConnection(Socket* clinetSocket);
+        void newConnection(std::unique_ptr<Socket> clinetSocket);
 
 
         void closeConnection(spConnection connection); // 关闭客户端的连接，在 Connection 类中 回调词函数
