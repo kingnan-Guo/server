@@ -92,10 +92,10 @@ void ThreadPool::addTask(std::function<void()> task){
 
 
 
-/*
 
 
 
+// Demo 1 STRART ===========================
 void show(int no, const std::string &name){
     printf("show 第 %d 个%s。\n", no, name.c_str());
 }
@@ -106,12 +106,28 @@ void test()
 }
 
 
-
-
 //      ps -ef | grep Reactor
 //      ps -T -p  21830
-int ThreadPool_MAIN(){
-    ThreadPool threadPool(4);
+// int ThreadPool_MAIN1(){
+//     ThreadPool threadPool(4);
+
+//     std::string name = "kingnan";
+
+    
+//     threadPool.addTask(std::bind(show, 1, name));
+//     sleep(1);
+//     threadPool.addTask(std::bind(test));
+
+//     threadPool.addTask(std::bind([]{
+//         printf("lambda。\n");
+//     }));
+//     sleep(100);
+//     return 0;
+// }
+
+
+void Demo1(){
+    ThreadPool threadPool(4, "Demo1");
 
     std::string name = "kingnan";
 
@@ -124,7 +140,100 @@ int ThreadPool_MAIN(){
         printf("lambda。\n");
     }));
     sleep(100);
+}
+
+// Demo 1 END
+
+
+
+
+
+// Demo 2 STRART ===========================
+//  会出现野指针，因为 data2 在 5s 后被析构了
+
+class Demo2Data{
+    public:
+        void show(){
+            printf("Data show。\n");
+        }
+    ~Demo2Data(){
+        printf("Data 析构。\n");
+    }
+};
+
+
+void  fun2(Demo2Data* data2)
+{
+    sleep(5);
+    data2->show();
+}
+
+
+void Demo2(){
+    ThreadPool threadPool(2, "Demo2");
+
+
+    {// 当前线程 中 
+        Demo2Data* data2 = new Demo2Data();
+        threadPool.addTask(
+            std::bind(fun2,data2)
+        );
+        delete data2;// 会调用 析构函数， 5s 后 会调用 data2 的析构函数
+    }
+    sleep(10);
+}
+
+// Demo 2 END
+#include <memory>
+
+// Demo 3 STRART ===========================
+// 使用智能指针
+
+class Data3{
+    public:
+        void show(){
+            printf("Data3 show。\n");
+        }
+    ~Data3(){
+        printf("Data3 析构。\n");
+    }
+};
+
+
+void  fun3(std::shared_ptr<Data3> data3)
+{
+    sleep(5);
+    data3->show();
+}
+
+/**
+ * 执行的结果是 
+ * 
+ * Data3 show。
+ * Data3 析构。
+ * 
+ * 在 5s 后，data3 被析构了，但是 show 函数仍然可以调用，说明 show 函数中的 data3 是一个智能指针，而不是裸指针
+*/
+void Demo3(){
+    ThreadPool threadPool(2, "Demo3");
+
+
+    {// 当前线程 中 
+        std::shared_ptr<Data3> data3(new Data3);
+        threadPool.addTask(
+            std::bind(fun3, data3)
+        );
+    }
+    sleep(10);
+}
+// Demo 3 END
+
+int ThreadPool_MAIN(){
+    // demo1();
+    // Demo2();
+    Demo3();
+
+
     return 0;
 }
 
-*/

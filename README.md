@@ -178,6 +178,28 @@ Connection 类： Reactor_13_add_Connection_class
 
 
 
+2025/01/04   13: 50
+在多线程中如何管理资源： Reactor_28_manage_resource_in_multiThread_Demo
+
+     
+     当前问题： 如果 资源在 多个线程中 使用，如何保证资源是有效的，使用完成后谁来释放 资源 （谁来 调用析构函数）
+
+     1、Connection 在 TcpServer 中创建， 主事件循环中创建 ，创建好之后 给到 从事件循环，可以说在主进程中创建，在 io 线程中 使用
+     2、如果收到了 客户端的请求报文，也就是有业务需要处理，那么 Connection 对象 将会作为参数 传到 工作线程 中，
+     3、但是如果 工作线程中 需要长时间的处理，而这时， 主事件循环中的 Connection 对象 可能  已经被  运行在 IO 线程的 closeContent  释放了，那么 工作线程中 就会使用一个已经被释放的对象，导致程序崩溃
+     ```C
+          Connection* connection = new Connection(subLoop_[clinetSocket->fd() % threadNum_], clinetSocket); // 这里new 出的对象没有释放
+     ```
+
+
+     添加一个 demo 使用 智能指针 在 ThreadPool.cpp
+          Demo1 触发 野指针的现象
+          Demo2 使用智能指针 解决 野指针的问题
+
+
+
+
+
 
 
 

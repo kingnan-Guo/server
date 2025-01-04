@@ -11,8 +11,8 @@ int main(int arch, char* argv[])
     printf("Reactor star \r\n");
 
     // tcpepoll3(arch, argv);
-    tcpepoll4(arch, argv);
+    // tcpepoll4(arch, argv);
 
-    // ThreadPool_MAIN();
+    ThreadPool_MAIN();
     return 0;
 }
