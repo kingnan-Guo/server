@@ -35,6 +35,13 @@ include_directories(
 
     module/netserver4 # EchoServer 启动函数
 
+
+
+    # DEMO
+    module/EVENTFD # eventFd demo
+    module/PIPE # eventFd PIPE
+
+
     # 动态库 =========
     # /lib/print_t# 指定动态链接库的目录
 

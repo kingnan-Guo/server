@@ -226,6 +226,16 @@ Connection 类： Reactor_13_add_Connection_class
      2、
      
    
+2025/01/05   21: 30
+用eventfd实现事件通知：  Reactor_31_use_eventfd_to_notify_event_demo
+     1、通知线程的方法： 条件变量、信号、socket 、管道、 eventFd
+     2、事件循环阻塞在 epoll_wait() 函数， 条件变量、信号有自己的等待函数， 不适合用于通知事件循环
+     3、socket 、管道、 eventFd 都是 fd， 都可以加入 epoll，都可以用于通知事件循环，但是 socket 、管道、 eventFd 都需要创建一个线程，而 eventFd 只需要创建一个文件描述符，所以选择 eventFd
+     4、在同一个进程中 不可能同时调用两个等待函数
+     5、
+
+
+
 
 
 
