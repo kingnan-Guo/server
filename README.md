@@ -234,10 +234,38 @@ Connection 类： Reactor_13_add_Connection_class
      4、在同一个进程中 不可能同时调用两个等待函数
      5、
 
+2025/01/05   22: 30
+异步唤醒事件循环（上）: Reactor_32_async_wake_up_event_loop_one
+改造 第一步将 智能指针 的 const std::unique_ptr<EventLoop>& loop_; 改回为 普通指针 EventLoop *loop_ = nullptr; 
+
+     1、 关于 connection.cpp
+          a、在 connection 中 的 Connection::send  在 工作线程中，
+          b、在 connection 中  Connection::writeCallBack 在 IO 线程中
+          c、但是 他们同时操作 发送缓冲区 outputBuffer_ 
+          d、工作线程处理完数据后 ，如果要发送数据 ，可以把 发送数据的操作 交给 IO 线程，这样就不需要给 发送缓冲区 outputBuffer_ 加锁了
+          e、如果计算任务 非常 小 ，那么也可以放到 IO 线程中，如果计算任务 非常大，那么就放到 工作线程中
+          f、实现方法:
+             1、给每个 从 Reactor 线程 添加 一个任务队列，有多少个 IO 线程就有多少个任务队列
+             2、工作线程处理完数据后，把 发送数据的操作 放到 IO 线程的任务队列中，如果 connection 属于 其中一个IO线程 （也是 EventLoop）， 那么就把任务放到 当前 IO 线程 的 任务队列； 
+             3、工作线程 把 数据发送给 任务队列后 ，唤醒 IO 线程，让 IO 线程执行任务，
+             4、 IO 线程 阻塞在 事件循环 的Evenloop  函数中， 使用 eventFd 唤醒事件循环，让事件循环执行任务队列中的任务
+     2、 如果计算任务 非常 小 ，那么也可以放到 IO 线程中，如果计算任务 非常大，那么就放到 工作线程中
+          a、修改代码支持 没有工作线程的情况
+          
+
+
+          
 
 
 
 
+
+
+# 笔记
+1、智能指针的使用建议
+     a、 如果生命周期难以 确定，则 使用 shard_ptr 来管理
+     b、 类 自己所拥有的资源用 unique_ptr 来管理， 在类被销毁的时候， 将会自动释放资源
+     c、不属于 自己、 但会使用的 资源，采用 unique_ptr& 或 shared_ptr 来管理会很麻烦，不易阅读， 可能有一系列问题，依旧采用 裸指针来管理
 
 
 

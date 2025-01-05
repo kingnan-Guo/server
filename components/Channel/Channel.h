@@ -14,8 +14,8 @@ class Channel {
         int fd_ = -1; // channel 拥有 fd ， channel 与 fd 是 一对一 关系
         // Epoll * ep_ = nullptr; // channel 一定会对应一颗 红黑树 Epoll
         
-        // EventLoop *loop_ = nullptr;   // Channel对应的事件循环，Channel与EventLoop是多对一的关系，一个Channel只对应一个EventLoop。
-        const std::unique_ptr<EventLoop>& loop_;
+        EventLoop *loop_ = nullptr;   // Channel对应的事件循环，Channel与EventLoop是多对一的关系，一个Channel只对应一个EventLoop。
+        // const std::unique_ptr<EventLoop>& loop_;
         
         
         bool inEpoll_ = false; // channel 是否在 epoll 中, 如果 未添加 调用 epoll_ctl() 的时候用 EPOLL_CTL_ADD 添加，否则 EPOLL_CLT_MOD 修改
@@ -37,8 +37,8 @@ class Channel {
         std::function<void()> writeCallback_;   // fd_ 写事件 的 回调函数， 将调用 Connection::writeCallBack()
     public:
         // Channel(Epoll* ep, int fd); // 构造函数
-        // Channel(EventLoop* eLoop, int fd); // 构造函数；    Channel 是 Acceptor 和 Connection 的 下层类 ； 
-        Channel(const std::unique_ptr<EventLoop>& Loop, int fd);
+        Channel(EventLoop* eLoop, int fd); // 构造函数；    Channel 是 Acceptor 和 Connection 的 下层类 ； 
+        // Channel(const std::unique_ptr<EventLoop>& Loop, int fd);
         
 
 

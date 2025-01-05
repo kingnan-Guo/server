@@ -90,9 +90,15 @@ void ThreadPool::addTask(std::function<void()> task){
 }; 
 
 
+// 获取线程池中的线程数量
+size_t ThreadPool::size(){
+    return threads_.size();
+}
 
 
 
+
+////////////////////////////////////////////////////////////////////////////
 
 
 // Demo 1 STRART ===========================

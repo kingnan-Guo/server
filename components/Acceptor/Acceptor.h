@@ -10,8 +10,8 @@
 class Acceptor
 {
     private:
-        // EventLoop* loop_;    // Acceptor 对应的事件循环， 在构造函数中传入, 从外面传过来的 
-        const std::unique_ptr<EventLoop>& loop_;//  Acceptor 对应的事件循环， 在构造函数中传入, 从外面传过来的, 没有所有权，所以 不能使用移动语义 ，所以只能使用 重引用 &
+        EventLoop* loop_;    // Acceptor 对应的事件循环， 在构造函数中传入, 从外面传过来的 
+        // const std::unique_ptr<EventLoop>& loop_;//  Acceptor 对应的事件循环， 在构造函数中传入, 从外面传过来的, 没有所有权，所以 不能使用移动语义 ，所以只能使用 重引用 &
 
 
         Socket serverScoket_;  // 成员变量 ；服务端用于监听socket ，在构造函数中 创建
@@ -22,8 +22,8 @@ class Acceptor
         std::function<void(std::unique_ptr<Socket>)> newConnectionCallback_;  // 处理新客户端的连接请求的  回调函数，指向  TcpServer::newConnection
 
     public:
-        // Acceptor(EventLoop* loop, const std::string &ip, uint16_t port);
-        Acceptor(const std::unique_ptr<EventLoop>& loop, const std::string &ip, uint16_t port);
+        Acceptor(EventLoop* loop, const std::string &ip, uint16_t port);
+        // Acceptor(const std::unique_ptr<EventLoop>& loop, const std::string &ip, uint16_t port);
  
         ~Acceptor();
 

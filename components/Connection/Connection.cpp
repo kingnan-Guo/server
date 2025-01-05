@@ -5,7 +5,9 @@
  * 
  */
 // Connection::Connection(EventLoop* loop, std::unique_ptr<Socket> clientsock): loop_(loop), clientScoket_(std::move(clientsock)), disConnect_(false), clientChannel_(new Channel(loop_, clientScoket_->fd()))
-Connection::Connection(const std::unique_ptr<EventLoop>& loop, std::unique_ptr<Socket> clientsock): loop_(loop), clientScoket_(std::move(clientsock)), disConnect_(false), clientChannel_(new Channel(loop_, clientScoket_->fd()))
+// Connection::Connection(const std::unique_ptr<EventLoop>& loop, std::unique_ptr<Socket> clientsock): loop_(loop), clientScoket_(std::move(clientsock)), disConnect_(false), clientChannel_(new Channel(loop_, clientScoket_->fd()))
+Connection::Connection(EventLoop* loop, std::unique_ptr<Socket> clientsock): loop_(loop), clientScoket_(std::move(clientsock)), disConnect_(false), clientChannel_(new Channel(loop_, clientScoket_->fd()))
+
 {
     // // 创建Channel对象，并添加到epoll中。
     // Channel* clientChannel = new Channel(ep_, clientSock->fd());
@@ -204,7 +206,7 @@ void Connection::onMessage(){
     }
 };
 
-
+#include <sys/syscall.h>
 // 发送数据。
 void Connection::send(const char *data,size_t size)        
 {
@@ -213,6 +215,8 @@ void Connection::send(const char *data,size_t size)
         printf("客户端已经断开了  send直接返回 \n");
         return;
     }
+
+    printf("Connection::send thread is ( 可能 在 工作 进程里 也可能是 IO 线程)= %d\n", syscall(SYS_gettid));
 
     // outputBuffer_.append(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
     outputBuffer_.appendWithHearder(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
@@ -232,6 +236,7 @@ void Connection::writeCallBack(){
         outputBuffer_.erase(0, writen); // 从缓存区中删除已发送的数据。
 
     }
+    printf("Connection::writeCallBack thread is (在 IO 进程里) = %d\n", syscall(SYS_gettid));
 
     if(outputBuffer_.size() == 0){
         // 如果缓存区为空，则关闭写事件

@@ -83,10 +83,18 @@ void EchoServer::HandleMessage(spConnection connection, std::string& message){
 
     // connection->send(message.data(),message.size());
 
-    // 把业务放到 线程池 的任务队列中
-    threadPool_.addTask(
-        std::bind(&EchoServer::OnMessage, this, connection, message)
-    );
+    // 判断 工作线程池的大小
+    if(threadPool_.size() == 0){ // 没有工作线程，那么直接调用 IO 线程
+        OnMessage(connection, message);
+    }
+    else{ // 有工作线程，那么把业务放到 线程池 的任务队列中
+        // 把业务放到 线程池 的任务队列中
+        threadPool_.addTask(
+            std::bind(&EchoServer::OnMessage, this, connection, message)
+        );
+    }
+
+
 
 };
 

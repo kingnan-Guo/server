@@ -1,7 +1,8 @@
 #include "Acceptor.h"
 
 // Acceptor::Acceptor(EventLoop* loop, const std::string &ip, uint16_t port): loop_(loop), serverScoket_(createnonblocking()), acceptChannel_(loop_, serverScoket_.fd())
-Acceptor::Acceptor(const std::unique_ptr<EventLoop>& loop, const std::string &ip, uint16_t port): loop_(loop), serverScoket_(createnonblocking()), acceptChannel_(loop_, serverScoket_.fd())
+// Acceptor::Acceptor(const std::unique_ptr<EventLoop>& loop, const std::string &ip, uint16_t port): loop_(loop), serverScoket_(createnonblocking()), acceptChannel_(loop_, serverScoket_.fd())
+Acceptor::Acceptor(EventLoop* loop, const std::string &ip, uint16_t port): loop_(loop), serverScoket_(createnonblocking()), acceptChannel_(loop_, serverScoket_.fd())
 
 
 {

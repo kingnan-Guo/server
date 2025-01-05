@@ -9,7 +9,17 @@ int tcpepoll4(int argc,char *argv[])
         return -1; 
     }
 
-    EchoServer echoserver(argv[1],atoi(argv[2]));
+    // EchoServer echoserver(argv[1],atoi(argv[2]));
+    /**
+     * EchoServer 构造函数
+     * params
+     *  ip
+     *  port
+     *  IO 线程 个数
+     *  work 线程个数
+     * 
+     */
+    EchoServer echoserver(argv[1],atoi(argv[2]), 3, 3);
 
     echoserver.Start();      
 

@@ -1,8 +1,9 @@
 #include "TcpServer.h"
 
 
-TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum): 
-threadNum_(threadNum), mainLoop_(new EventLoop()), acceptor_(mainLoop_, ip, port), threadPool_(threadNum_, "IO")
+//TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum): threadNum_(threadNum), mainLoop_(new EventLoop()), acceptor_(mainLoop_, ip, port), threadPool_(threadNum_, "IO")
+TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum): threadNum_(threadNum), mainLoop_(new EventLoop()), acceptor_(mainLoop_.get(), ip, port), threadPool_(threadNum_, "IO")
+
 {
 
     /*
@@ -160,7 +161,8 @@ void TcpServer::newConnection(std::unique_ptr<Socket> clinetSocket){
 
     // 把 客户端的fd 分配给 线程池 中的线程
     // Connection* connection = new Connection(subLoop_[clinetSocket->fd() % threadNum_], clinetSocket); // 这里new 出的对象没有释放
-    spConnection connection(new Connection(subLoop_[clinetSocket->fd() % threadNum_], std::move(clinetSocket) ));
+    // spConnection connection(new Connection(subLoop_[clinetSocket->fd() % threadNum_], std::move(clinetSocket) ));
+    spConnection connection(new Connection(subLoop_[clinetSocket->fd() % threadNum_].get(), std::move(clinetSocket) ));
 
 
     connection->setCloseCallBack(

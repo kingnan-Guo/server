@@ -17,8 +17,8 @@ class Connection:public std::enable_shared_from_this<Connection>
     
     private:
         
-        // EventLoop* loop_;    // Connection 对应的事件循环， 在构造函数中传入, 从外面传过来的 
-        const std::unique_ptr<EventLoop>& loop_;
+        EventLoop* loop_;    // Connection 对应的事件循环， 在构造函数中传入, 从外面传过来的 
+        // const std::unique_ptr<EventLoop>& loop_;
 
 
         // Socket* clientScoket_;  // 与 客户端 通信 的 socket； 虽然 是传入进来的值 ，但是 属于 Connection 的成员变量，所以 需要在析构函数中删除 
@@ -41,8 +41,8 @@ class Connection:public std::enable_shared_from_this<Connection>
 
     public:
         // Connection(EventLoop* loop, Socket* clientScoket);
-        // Connection(EventLoop* loop, std::unique_ptr<Socket> clientScoket);
-        Connection(const std::unique_ptr<EventLoop>& loop, std::unique_ptr<Socket> clientScoket);
+        Connection(EventLoop* loop, std::unique_ptr<Socket> clientScoket);
+        // Connection(const std::unique_ptr<EventLoop>& loop, std::unique_ptr<Socket> clientScoket);
         
         ~Connection();
 

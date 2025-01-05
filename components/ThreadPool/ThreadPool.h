@@ -31,7 +31,9 @@ public:
     // 在析构函数中 将停止线程
     ~ThreadPool();
     // 把任务添加到队列中 
-    void addTask(std::function<void()> task); 
+    void addTask(std::function<void()> task);
+
+    size_t size();
 };
 
 int ThreadPool_MAIN();
