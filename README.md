@@ -264,7 +264,11 @@ Connection 类： Reactor_13_add_Connection_class
           b、  在 Connection::send 中 把发送数据的操作 放到 EventLoop 的 任务队列中 
           c、 使用 EventFd 唤醒 事件循环， 也就是 在IO 线程中，执行 任务队列中的 发送数据的操作
           d、 使用一个循环 执行 队列中 全部的 任务
-          e、把 wakeupFd_ 加入到 epoll 中，关注可读事件，当可读事件触发的时候，执行任务队列中的任务
+          e、把 wakeupFd_ 加入到 epoll 中，关注可读事件，当可读事件触发的时候，执行任务队列中的任务， 使用 wakeChannel_(new Channel(this, wakeupFd_))  将 wakeupFd_ 加入到 epoll 中，关注可读事件
+          f、使用 wakeChannel_->setReadCallback(std::bind(&EventLoop::handleWakeUp, this)); 来绑定 handleWakeUp 函数，当可读事件触发的时候，执行 handleWakeUp 函数
+          g、 激活 读事件  wakeChannel_->enableReading();
+          h、在 void EventLoop::handleWakeUp() 函数中，会先把 wakeupFd_ 读取出来， 然后设置 队列加锁，去判断 队列中 如果 有任务要执行 那么 执行任务并且 出队，
+          i、 使用 wakeupFd_ 唤醒 事件循环， 的操作是 在 往 任务队列 添加完 事件之后
 
      
 
