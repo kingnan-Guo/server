@@ -235,7 +235,7 @@ Connection 类： Reactor_13_add_Connection_class
      5、
 
 2025/01/05   22: 30
-异步唤醒事件循环（上）: Reactor_32_async_wake_up_event_loop_one
+异步唤醒事件循环（上）: Reactor_31_async_wake_up_event_loop_one
 改造 第一步将 智能指针 的 const std::unique_ptr<EventLoop>& loop_; 改回为 普通指针 EventLoop *loop_ = nullptr; 
 
      1、 关于 connection.cpp
