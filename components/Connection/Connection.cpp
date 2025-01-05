@@ -206,9 +206,9 @@ void Connection::onMessage(){
     }
 };
 
-#include <sys/syscall.h>
+
 // 发送数据。
-void Connection::send(const char *data,size_t size)        
+void Connection::send(const char *data, size_t size)        
 {
 
     if(disConnect_ == true){
@@ -216,8 +216,31 @@ void Connection::send(const char *data,size_t size)
         return;
     }
 
+    // 判断 当前 线程 是否为 事件循环线程 (IO 线程)
+    if(loop_ -> isInLoopThread()){
+         printf("Connection::send 在事件循环的 线程中\n");
+        // 如果 当前线程是 IO 线程，则直接发送数据
+        sendInLoop(data, size);
+    } else{
+        // 如果 当前线程不是 IO 线程， 把发送的 数据 的 操作 交给 IO 线程 去执行
+        printf(" 当前线程不是 IO 线程， 把发送的 数据 的 操作 交给 IO 线程 去执行 \n");
+    
+
+        // 把这个函数 传给他 ，让 IO 线程 调用
+        loop_->queueInLoop(
+            std::bind(&Connection::sendInLoop, this, data, size)
+        );
+    
+    }
+
     printf("Connection::send thread is ( 可能 在 工作 进程里 也可能是 IO 线程)= %d\n", syscall(SYS_gettid));
 
+
+}
+
+
+// 发送数据; 如果当前线程是 IO 线程，直接调用次函数， 如果是工作线程，将把次函数 传给 IO 线程，由 IO 线程调用
+void Connection::sendInLoop(const char *data,size_t size){
     // outputBuffer_.append(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
     outputBuffer_.appendWithHearder(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
 

@@ -14,7 +14,7 @@ class Channel {
         int fd_ = -1; // channel 拥有 fd ， channel 与 fd 是 一对一 关系
         // Epoll * ep_ = nullptr; // channel 一定会对应一颗 红黑树 Epoll
         
-        EventLoop *loop_ = nullptr;   // Channel对应的事件循环，Channel与EventLoop是多对一的关系，一个Channel只对应一个EventLoop。
+        EventLoop* loop_ = nullptr;   // Channel对应的事件循环，Channel与EventLoop是多对一的关系，一个Channel只对应一个EventLoop。
         // const std::unique_ptr<EventLoop>& loop_;
         
         

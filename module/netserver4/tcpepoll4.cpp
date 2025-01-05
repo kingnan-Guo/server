@@ -19,7 +19,8 @@ int tcpepoll4(int argc,char *argv[])
      *  work 线程个数
      * 
      */
-    EchoServer echoserver(argv[1],atoi(argv[2]), 3, 3);
+    EchoServer echoserver(argv[1],atoi(argv[2]), 3, 2);
+    // EchoServer echoserver(argv[1],atoi(argv[2]), 3, 0);
 
     echoserver.Start();      
 

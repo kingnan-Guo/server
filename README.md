@@ -253,8 +253,20 @@ Connection 类： Reactor_13_add_Connection_class
           a、修改代码支持 没有工作线程的情况
           
 
+2025/01/05   23: 30
+异步唤醒事件循环（下）： Reactor_32_async_wake_up_event_loop_two
+正式使用 eventFd 唤醒事件循环，实现异步发送数据
+     1、在 Connection 、 Channel 、Acceptor 中 都用到了 事件循环， 用 Connection 创建的 对象， 有时候 工作在 工作线程中， 有时候 工作在 IO 线程中， 所以 需要一个功能 判断当前线程是不是 IO 线程，放在 EvenLoop 类中 ，使用 pid_t threadId_ 记录当前线程
+     2、不管是 主事件 mainLoop_ 循环 还是 从事件循环  subLoop_ 都是在 TcpServer 的 构造函数中创建的，创建了 事件循环之后，才让它 运行在 线程 中， 所以 要在 void EventLoop::run() 中 记录 threadId_
+     3、修改 Connection 中的send ， Connection::send 有可能 在 工作线程中，也有可能在 IO 线程中，
+     4、 如果 前线程不是 IO 线程， 把发送的 数据 的 操作 交给 IO 线程 去执行 
+          a、 在事件循环 EventLoop 中 创建一个任务队列 queue
+          b、  在 Connection::send 中 把发送数据的操作 放到 EventLoop 的 任务队列中 
+          c、 使用 EventFd 唤醒 事件循环， 也就是 在IO 线程中，执行 任务队列中的 发送数据的操作
+          d、 使用一个循环 执行 队列中 全部的 任务
+          e、把 wakeupFd_ 加入到 epoll 中，关注可读事件，当可读事件触发的时候，执行任务队列中的任务
 
-          
+     
 
 
 
@@ -265,7 +277,7 @@ Connection 类： Reactor_13_add_Connection_class
 1、智能指针的使用建议
      a、 如果生命周期难以 确定，则 使用 shard_ptr 来管理
      b、 类 自己所拥有的资源用 unique_ptr 来管理， 在类被销毁的时候， 将会自动释放资源
-     c、不属于 自己、 但会使用的 资源，采用 unique_ptr& 或 shared_ptr 来管理会很麻烦，不易阅读， 可能有一系列问题，依旧采用 裸指针来管理
+     c、不属于 自己、 但会使用的 资源，采用 unique_ptr& 或 shared_ptr 来管理会很麻烦，不易阅读， 可能有一系列问题，依旧采用 裸指针来管理 
 
 
 
