@@ -8,6 +8,7 @@
 #include <memory>// 使用只能指针 
 #include <atomic>
 #include <sys/syscall.h>
+#include "TimeStamp.h"
 
 class Connection;
 //定义只能指针 别名， 把 普通指针 Connection*  改为 智能指针 spConnection，防止内存泄漏
@@ -40,6 +41,7 @@ class Connection:public std::enable_shared_from_this<Connection>
         //
         std::atomic_bool disConnect_;  // 客户端 连接是否已经断开，如果断开，则设为 true； 在 IO 线程中会改变这个值，在工作线程中会 读取 判断这个值 ，所以需要使用原子变量
 
+        TimeStamp lastTime_;  // 创建 connection 的时间，没接收到一个 报文，把时间更新为当前时间
     public:
         // Connection(EventLoop* loop, Socket* clientScoket);
         Connection(EventLoop* loop, std::unique_ptr<Socket> clientScoket);

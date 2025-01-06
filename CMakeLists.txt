@@ -19,6 +19,7 @@ include_directories(
     components/Acceptor     # Acceptor 类
     components/Connection   # Connection 类
     components/Buffer       # Buffer 类 , 数据缓冲区
+    components/TimeStamp        # 定时器类
 
 
     components/ThreadPool   # 线程池 Demo

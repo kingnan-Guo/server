@@ -2,7 +2,7 @@
 
 
 //TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum): threadNum_(threadNum), mainLoop_(new EventLoop()), acceptor_(mainLoop_, ip, port), threadPool_(threadNum_, "IO")
-TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum): threadNum_(threadNum), mainLoop_(new EventLoop()), acceptor_(mainLoop_.get(), ip, port), threadPool_(threadNum_, "IO")
+TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum): threadNum_(threadNum), mainLoop_(new EventLoop(true)), acceptor_(mainLoop_.get(), ip, port), threadPool_(threadNum_, "IO")
 
 {
 
@@ -91,7 +91,7 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum):
     for(int i = 0; i < threadNum_; i++){
         // 创建一个 EventLoop 对象,放入到 subLoop_ 容器 中
         // subLoop_.push_back(new EventLoop());
-        subLoop_.emplace_back(new EventLoop());
+        subLoop_.emplace_back(new EventLoop(false));
 
 
 

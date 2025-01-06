@@ -182,6 +182,12 @@ void Connection::onMessage(){
                 // send(
                 //     fd(), inputBuffer_.data(), inputBuffer_.size(), 0
                 // );
+
+                //这里已经接收到完整的 报文了 ，更新时间
+                lastTime_ = TimeStamp::Now();
+                std::cout << "lastTime_ = " << lastTime_.toString() << std::endl;
+
+                
             }
 
 

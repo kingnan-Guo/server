@@ -1,15 +1,47 @@
 #include "EventLoop.h"
 
 
+// 创建定时器
+int createTimerFd(int sec){
+    int timerFd = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK );
+
+    // 设置定时器的初始值和周期。
+    struct itimerspec timeout;
+    // 注释 
+    memset(&timeout, 0, sizeof(struct itimerspec));
+
+    // 设置时间
+    timeout.it_value.tv_sec = 5; // 5秒后触发
+    timeout.it_value.tv_nsec = 0;// 纳秒
+
+    // 开始计时 alarm(5)
+    timerfd_settime(timerFd, 0, &timeout, NULL);
+
+    return timerFd; // 返回定时器fd
+}
+
+
+
 // 构造函数 
 // 创建 ep_  = new Epoll
-EventLoop::EventLoop():ep_(new Epoll), wakeupFd_(eventfd(0, EFD_NONBLOCK)), wakeChannel_(new Channel(this, wakeupFd_))
+EventLoop::EventLoop(bool isMainLoop):
+    ep_(new Epoll), 
+    wakeupFd_(eventfd(0, EFD_NONBLOCK)), 
+    wakeChannel_(new Channel(this, wakeupFd_)), 
+    timerFd_(createTimerFd(30)), 
+    timerChannel_(new Channel(this, timerFd_)),
+    isMainLoop_(isMainLoop)
 {
 
     // 设置 读 回调
     wakeChannel_->setReadCallback(std::bind(&EventLoop::handleWakeUp, this));
     // 激活 读事件
     wakeChannel_->enableReading();
+
+
+    // 定时器 注册 读事件
+    timerChannel_->setReadCallback(std::bind(&EventLoop::handleTimer, this));
+    timerChannel_->enableReading();
 
 }
 
@@ -160,3 +192,40 @@ void EventLoop::handleWakeUp(){
     }
 
 };
+
+
+
+// 定时器相关： 闹钟响时 执行的函数
+void EventLoop::handleTimer(){
+    // 重新计时
+
+    // 设置定时器的初始值和周期。
+    struct itimerspec timeout;
+    // 注释 
+    memset(&timeout, 0, sizeof(struct itimerspec));
+
+    // 设置时间
+    timeout.it_value.tv_sec = 5; // 5秒后触发
+    timeout.it_value.tv_nsec = 0;// 纳秒
+
+    // 开始计时 alarm(5)
+    timerfd_settime(timerFd_, 0, &timeout, NULL);
+
+
+    if(isMainLoop_){
+         printf("alarm  time out  handleTimer() 主  线程id thread id  = %d \n", syscall(SYS_gettid));
+    } else {
+         printf("alarm  time out  handleTimer() 从 线程id thread id  = %d \n", syscall(SYS_gettid));
+    }
+
+   
+    // if (isMainLoop_)
+    //     printf("主事件循环的闹钟时间到了。\n");
+    // else
+    //     printf("从事件循环的闹钟时间到了。\n");
+
+};
+
+
+
+

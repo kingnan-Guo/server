@@ -11,6 +11,10 @@
 
 #include <sys/eventfd.h>
 #include <sys/syscall.h>
+
+#include "TimeStamp.h"
+#include <sys/timerfd.h>      // 定时器需要包含这个头文件。
+
 /**
  *  每个 事件循环里肯定有一个 epoll 
  */
@@ -37,8 +41,14 @@ class EventLoop
         int wakeupFd_; // eventfd 用来 唤醒 事件循环
 
         std::unique_ptr<Channel> wakeChannel_; // 用来监听 eventfd 的 channel
+
+        // 定时器相关
+        int timerFd_; // 时间fd
+        std::unique_ptr<Channel> timerChannel_; // 定时器的 channel 用来向 epoll 注册 定时器 fd
+        bool isMainLoop_; // 是否时 true 主事件循环， false 表示 从事件循环
+
     public:
-        EventLoop();
+        EventLoop(bool isMainLoop);
         ~EventLoop();
 
         // 返回 Epoll
@@ -66,6 +76,10 @@ class EventLoop
 
         // 增加一个 事件 循环 线程 被eventfd 唤醒 ， 被唤醒后 执行的 函数
         void handleWakeUp();
+
+
+        // 定时器相关： 闹钟响时 执行的函数
+        void handleTimer();
 };
 
 

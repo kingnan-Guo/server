@@ -273,11 +273,47 @@ Connection 类： Reactor_13_add_Connection_class
      
 
 2025/01/06  12:17
-性能优化-组织浪费，清空空闲的TCP连接（上）   Reactor_33_performance_optimization_one_demo
+性能优化-阻止浪费，清空空闲的TCP连接（上）   Reactor_33_performance_optimization_one_demo
      1、把最初版本的 netserver 复制出来 变成  netserver5
      2、在 netserver5 上开始写 定时器 信号 抽象出来 fd 的 Demo
           （a）: 定时器  fd   传给 epoll
           （b）: 信号  fd     传给 epoll
+
+
+
+2025/01/06  17: 30
+性能优化-阻止浪费，清除空闲的TCP连接（中）：Reactor_33_performance_optimization_one        
+清理空闲的 connection 
+     1、增加时间戳类 ，记录当前时间，记录上一次活动时间
+     2、在 Connection 中增加 时间戳类，记录当前时间，记录上一次活动时间， 处理对端发过来的函数
+     3、在 EventLoop 中增加  timerFd_ 和 timerChannel_
+     4、当前 在 EventLoop 将 timerFd 注册到 epoll 中 ， 并且使用  timerChannel_ 注册 handleTimer 事件
+     5、 handleTimer 事件中 再次 重新计时， 并且  从事件循环 要清理 空闲的 connection ，
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
