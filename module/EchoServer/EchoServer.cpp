@@ -83,6 +83,8 @@ void EchoServer::HandleMessage(spConnection connection, std::string& message){
 
     // connection->send(message.data(),message.size());
 
+
+    // 这里是将 收到的数据 又 发送回去，正常业务中 不是这样的，这里只是为了测试
     // 判断 工作线程池的大小
     if(threadPool_.size() == 0){ // 没有工作线程，那么直接调用 IO 线程
         OnMessage(connection, message);

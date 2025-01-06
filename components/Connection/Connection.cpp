@@ -183,6 +183,8 @@ void Connection::onMessage(){
                 // printf("message (eventfd=%d):%s\n", fd(), message.data());
                 
                 // onMessageCallBack_(this(), message); // 回调TcpServer::onMessage()。
+                
+                // 这个是收到 数据后  调用 callBack 给 业务层
                 onMessageCallBack_(shared_from_this(), message); // 回调TcpServer::onMessage()。
 
                 // send(

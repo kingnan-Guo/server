@@ -52,8 +52,8 @@ void Buffer::appendWithSep(const char* data, size_t size){
     }
     // http 协议 的 \r\n\r\n"分隔符
     else if (sep_ == 2){
-        buffer_.append(data, size);         // 处理报文内容。
-        buffer_.append("\r\n\r\n", 4);         // 处理报文内容。
+        // 如何处理
+        buffer_.append(data, size);      // HTTP 协议只需要直接追加数据
     }
 
     // // buffer_.append((char*)&size, 4);   // 处理报文长度（头部）。
@@ -89,7 +89,16 @@ bool Buffer::pickMessage(std::string &data){
     } 
     // http 协议 的 \r\n\r\n"分隔符
     else if(sep_ == 2){
-        
+        // 如何处理
+
+        size_t pos = buffer_.find("\r\n\r\n");
+        if (pos == std::string::npos) {
+            return false; // 分隔符未找到
+        }
+
+        data = buffer_.substr(0, pos + 4); // 包括 "\r\n\r\n" 的完整报文
+        buffer_.erase(0, pos + 4);         // 删除已提取的报文
+
     }
 
     return true;

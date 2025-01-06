@@ -8,7 +8,7 @@ class Buffer{
         std::string buffer_;
         const uint16_t sep_;  // 报文的分隔符：0-无分隔符(固定长度、视频会议)；1-四字节的报头；2-"\r\n\r\n"分隔符（http协议）。
     public:
-        Buffer(uint16_t sep = 1);
+        Buffer(uint16_t sep = 2);
         ~Buffer();
         void append(const char* data, int size);  // 把数据追加到 buffer_ 中
 
