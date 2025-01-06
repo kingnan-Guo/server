@@ -11,7 +11,7 @@ int createTimerFd(int sec){
     memset(&timeout, 0, sizeof(struct itimerspec));
 
     // 设置时间
-    timeout.it_value.tv_sec = 5; // 5秒后触发
+    timeout.it_value.tv_sec = sec; // 5秒后触发
     timeout.it_value.tv_nsec = 0;// 纳秒
 
     // 开始计时 alarm(5)
@@ -24,13 +24,15 @@ int createTimerFd(int sec){
 
 // 构造函数 
 // 创建 ep_  = new Epoll
-EventLoop::EventLoop(bool isMainLoop):
+EventLoop::EventLoop(bool isMainLoop, int timerVl, int timerOut):
     ep_(new Epoll), 
     wakeupFd_(eventfd(0, EFD_NONBLOCK)), 
     wakeChannel_(new Channel(this, wakeupFd_)), 
-    timerFd_(createTimerFd(30)), 
+    timerFd_(createTimerFd(timerOut)), 
     timerChannel_(new Channel(this, timerFd_)),
-    isMainLoop_(isMainLoop)
+    isMainLoop_(isMainLoop),
+    timeVl_(timerVl),
+    timeOut_(timerOut)
 {
 
     // 设置 读 回调
@@ -50,6 +52,7 @@ EventLoop::EventLoop(bool isMainLoop):
 EventLoop::~EventLoop()
 {
     // delete ep_;
+    printf("EventLoop  conn 已析构 \n");
 }
 
 
@@ -205,7 +208,7 @@ void EventLoop::handleTimer(){
     memset(&timeout, 0, sizeof(struct itimerspec));
 
     // 设置时间
-    timeout.it_value.tv_sec = 5; // 5秒后触发
+    timeout.it_value.tv_sec = timeVl_; // 5秒后触发
     timeout.it_value.tv_nsec = 0;// 纳秒
 
     // 开始计时 alarm(5)
@@ -215,17 +218,44 @@ void EventLoop::handleTimer(){
     if(isMainLoop_){
          printf("alarm  time out  handleTimer() 主  线程id thread id  = %d \n", syscall(SYS_gettid));
     } else {
-         printf("alarm  time out  handleTimer() 从 线程id thread id  = %d \n", syscall(SYS_gettid));
+        //  闹钟时间到了， 遍历 ConnectionMap_ ，判断每个 connection 对象是否超时
+        printf("alarm  time out  handleTimer() 从 线程id thread id  = %d  fd = ", syscall(SYS_gettid));
+    
+        time_t now = time(NULL);
+        for(auto &it:ConnectionMap_){
+            printf("%d ", it.first);
+            if(it.second->timeOut(now, timeOut_)){
+                {
+                    std::lock_guard<std::mutex> gd(connectionsMapMutex_);// 加锁
+                    // 超时 从容器中删除 connection
+                    ConnectionMap_.erase(it.first);// 也可以 ConnectionMap_.erase(it.second->fd());
+                }
+
+                if(timerCallBack_){
+                    timerCallBack_(it.first);
+                }
+            }
+        }
+        printf("\n");
+    
     }
 
-   
-    // if (isMainLoop_)
-    //     printf("主事件循环的闹钟时间到了。\n");
-    // else
-    //     printf("从事件循环的闹钟时间到了。\n");
+
 
 };
 
 
+//添加 Connection 到  ConnectionMap_ 中的函数
+void EventLoop::newConnection(spConnection connection){
+    std::lock_guard<std::mutex> gd(connectionsMapMutex_);// 加锁
+    ConnectionMap_[connection->fd()] = connection;
+};
 
+
+
+
+// 设置 回调函数的 成员函数 // 将被设置为TcpServer::removeConnectionCallBack()
+void EventLoop::setTimerCallBack(std::function<void(int)> cb){
+    timerCallBack_ = cb;
+};
 

@@ -282,7 +282,7 @@ Connection 类： Reactor_13_add_Connection_class
 
 
 2025/01/06  17: 30
-性能优化-阻止浪费，清除空闲的TCP连接（中）：Reactor_33_performance_optimization_one        
+性能优化-阻止浪费，清除空闲的TCP连接（中）： Reactor_33_performance_optimization_one        
 清理空闲的 connection 
      1、增加时间戳类 ，记录当前时间，记录上一次活动时间
      2、在 Connection 中增加 时间戳类，记录当前时间，记录上一次活动时间， 处理对端发过来的函数
@@ -291,6 +291,20 @@ Connection 类： Reactor_13_add_Connection_class
      5、 handleTimer 事件中 再次 重新计时， 并且  从事件循环 要清理 空闲的 connection ，
 
 
+
+2025/01/06  19: 30
+性能优化-阻止浪费，清除空闲的TCP连接（下）：Reactor_34_performance_optimization_end
+正式 清理空闲的 connection ， 清理空闲的连接 就是把当前的 时间 减去 上一次活动时间，如果 大于 60s，那么就清理 connection
+     步骤：
+     1、在事件循环 EventLoop 中 增加 map<int spConnection> ConnectionMap_ 容器， 存放运行在该 事件循环上 全部的 connection 对象
+     2、如果 闹钟时间到了， 遍历 ConnectionMap_ ，判断每个 connection 对象是否超时
+     3、如果超时了，那么从 ConnectionMap_ 中删除 该 connection 对象，并且调用 connection 对象的 close 函数，关闭连接
+     4、还需要从 TCP Server::connections_ 中删除 该 connection 对象
+     5、TcpServer  和 EventLoop 的 map 容器 需要 加锁；
+          a: 操作这个 map 容器 的 线程 可能时 主事件循环， 也有可能是 从事件循环
+          b: 创建 connection 连接的时候，是  void TcpServer::newConnection()， 运行 在主事件循环中，而释放 connection 的代码在 从事件循环 中 ；
+          c: 多个线程 操作 同一个 map 容器，需要加锁
+     6、闹钟 时间间隔 和 超时事件 参数话
 
 
 

@@ -10,6 +10,9 @@
 #include <sys/syscall.h>
 #include "TimeStamp.h"
 
+class EventLoop;
+class Channel;
+
 class Connection;
 //定义只能指针 别名， 把 普通指针 Connection*  改为 智能指针 spConnection，防止内存泄漏
 using spConnection=std::shared_ptr<Connection>;
@@ -76,7 +79,10 @@ class Connection:public std::enable_shared_from_this<Connection>
         // 发送数据; 不管在 任何线程中 都是调用次函数发送数据
         void send(const char *data,size_t size);        // 发送数据。
         // 发送数据; 如果当前线程是 IO 线程，直接调用次函数， 如果是工作线程，将把次函数 传给 IO 线程，由 IO 线程调用
-        void sendInLoop(const char *data,size_t size);  
+        void sendInLoop(const char *data,size_t size);
+
+        // 判断 TCP 连接是否超时 ， 空闲太久 timeOut
+        bool timeOut(time_t now, int timeOut);
 };
 
 

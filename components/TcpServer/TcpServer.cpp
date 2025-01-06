@@ -2,7 +2,11 @@
 
 
 //TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum): threadNum_(threadNum), mainLoop_(new EventLoop()), acceptor_(mainLoop_, ip, port), threadPool_(threadNum_, "IO")
-TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum): threadNum_(threadNum), mainLoop_(new EventLoop(true)), acceptor_(mainLoop_.get(), ip, port), threadPool_(threadNum_, "IO")
+TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum): 
+        threadNum_(threadNum), 
+        mainLoop_(new EventLoop(true)), 
+        acceptor_(mainLoop_.get(), ip, port), 
+        threadPool_(threadNum_, "IO")
 
 {
 
@@ -91,7 +95,7 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum):
     for(int i = 0; i < threadNum_; i++){
         // 创建一个 EventLoop 对象,放入到 subLoop_ 容器 中
         // subLoop_.push_back(new EventLoop());
-        subLoop_.emplace_back(new EventLoop(false));
+        subLoop_.emplace_back(new EventLoop(false, 5, 10));// 从事件循环 的 闹钟 时间 设置为 5ms，定时器超时时间 设置为 10ms
 
 
 
@@ -99,6 +103,13 @@ TcpServer::TcpServer(const std::string &ip, const uint16_t port, int threadNum):
         subLoop_[i]->setEpollTimeOutCallBack(
             std::bind(&TcpServer::epollTimeOut, this, std::placeholders::_1)
         );
+        // 设置 清除 Connection 的 回调函数， 在 EventLoop 中调用
+        subLoop_[i]->setTimerCallBack(
+            std::bind(&TcpServer::removeConnection, this, std::placeholders::_1)
+        );
+
+
+
         // 把 EventLoop 的 run（） 作为任务 添加给 线程池， 线程池中的线程运行这个任务， 就可以运行事件循环了
         threadPool_.addTask(
             // std::bind(&EventLoop::run, subLoop_[i])
@@ -195,7 +206,17 @@ void TcpServer::newConnection(std::unique_ptr<Socket> clinetSocket){
 
 
     // 创建 connection 对象后 把 connection 对象 添加到 connections_  类型为 map 的 容器 中
-    connections_[connection->fd()] = connection;
+    {
+        std::lock_guard<std::mutex> gd(connectionsMapMutex_);// 加锁
+        connections_[connection->fd()] = connection; // 这里是智能指针，不需要 delete
+    }
+
+
+    // 还需要把 connection 对象 添加到 EventLoop 的 ConnectionMap_ 中
+    subLoop_[connection->fd() % threadNum_]->newConnection(connection);
+
+
+    printf("TcpServer::newConnection() thread is %d.\n",syscall(SYS_gettid)); 
 
     // 回调 newConnectionCallBack_
     if (newConnectionCallBack_){
@@ -215,8 +236,12 @@ void TcpServer::closeConnection(spConnection connection){
 
     printf("client ( eventfd = %d ) disconnected.\n", connection->fd());
     // close(connection->fd());                // 关闭 客户端  fd ; 
-    connections_.erase(connection->fd());       // 在 connections_ 中删除 connection 对象
+    {
+        std::lock_guard<std::mutex> gd(connectionsMapMutex_);// 加锁
+        connections_.erase(connection->fd());       // 在 connections_ 中删除 connection 对象
+    }
     // delete connection;
+
 
 };
 
@@ -229,7 +254,10 @@ void TcpServer::errorConnection(spConnection connection){
 
     printf("client ( eventfd = %d ) error.\n", connection->fd());
     // close(connection->fd());
-    connections_.erase(connection->fd());       // 在 connections_ 中删除 connection 对象
+    {
+        std::lock_guard<std::mutex> gd(connectionsMapMutex_);// 加锁
+        connections_.erase(connection->fd());       // 在 connections_ 中删除 connection 对象
+    }
     // delete connection;
 };
 
@@ -301,4 +329,15 @@ void TcpServer::setSendCompleteCallBack(std::function<void(spConnection)> sendCo
 
 void TcpServer::setTimeOutCallBack(std::function<void(EventLoop*)> timeOutCallBack){
     timeOutCallBack_ = timeOutCallBack;
+};
+
+// 从 map 中删除 connection 对象
+void TcpServer::removeConnection(int fd){
+    printf("TcpServer::removeConnection() thread is %d.\n",syscall(SYS_gettid));
+    {
+        // 
+        std::lock_guard<std::mutex> gd(connectionsMapMutex_);// 加锁
+        connections_.erase(fd);
+    }
+    
 };

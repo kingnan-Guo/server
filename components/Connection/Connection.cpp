@@ -275,4 +275,11 @@ void Connection::writeCallBack(){
         sendCompletionCallback_(shared_from_this());
         
     }
-};  
+};
+
+
+
+// 判断 TCP 连接是否超时 ， 空闲太久 timeOut
+bool Connection::timeOut(time_t now, int timeOut){
+    return (now - lastTime_.toInt()) > timeOut;
+}

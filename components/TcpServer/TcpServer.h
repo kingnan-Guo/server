@@ -1,6 +1,7 @@
 #pragma once
 #include <sys/epoll.h>
 #include <map>
+#include <mutex> // 锁
 #include "Epoll.h"
 #include "InetAddress.h"
 #include "Socket.h"
@@ -35,7 +36,7 @@ class TcpServer{
 
         // 使用 map 来管理所有的连接
         std::map<int, spConnection> connections_; // int 整数  ； Connection* 指针 ； 一个 TcpServer 有多个 Connection 对象， 存放在 map 容器中
-
+        std::mutex connectionsMapMutex_;                                       // 保护 connections_ 的互斥锁。
         std::function<void(spConnection)> newConnectionCallBack_;                // 回调EchoServer::HandleNewConnection()。
         std::function<void(spConnection)> closeConnectionCallBack_;              // 回调EchoServer::HandleClose()。
         std::function<void(spConnection)> errorConnectionCallBack_;              // 回调EchoServer::HandleError()。
@@ -75,5 +76,6 @@ class TcpServer{
         void setSendCompleteCallBack(std::function<void(spConnection)> sendCompleteCallBack);
         void setTimeOutCallBack(std::function<void(EventLoop*)> timeOutCallBack);
 
-        
+        // 删除 fd 的回调函数
+        void removeConnection(int fd);
 };
