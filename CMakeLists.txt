@@ -40,6 +40,7 @@ include_directories(
     # DEMO
     module/EVENTFD # eventFd demo
     module/PIPE # eventFd PIPE
+    module/timerfdAndSigefdDemo # 定时器 fd 和 信号 fd Demo
 
 
     # 动态库 =========

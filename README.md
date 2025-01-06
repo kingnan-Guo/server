@@ -272,6 +272,13 @@ Connection 类： Reactor_13_add_Connection_class
 
      
 
+2025/01/06  12:17
+性能优化-组织浪费，清空空闲的TCP连接（上）   Reactor_33_performance_optimization_one_demo
+     1、把最初版本的 netserver 复制出来 变成  netserver5
+     2、在 netserver5 上开始写 定时器 信号 抽象出来 fd 的 Demo
+          （a）: 定时器  fd   传给 epoll
+          （b）: 信号  fd     传给 epoll
+
 
 
 
