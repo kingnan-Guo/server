@@ -322,7 +322,9 @@ Connection 类： Reactor_13_add_Connection_class
           4、 EventLoop::stop() 中要 唤醒事件循环 ， wakeup() 使用 eventFd_ 唤醒 事件循环， 为什么要唤醒事件循环？ 因为 stop() 是在 主线程中调用的，而 epoll_wait 是在 从线程中调用的，所以需要唤醒事件循环，让 epoll_wait 退出，然后才能执行 stop() 中的代码， 为什么唤醒才能退出 epoll_wait ？？如果不唤醒，从线程会一直停留在 epoll_wait 中，无法执行任何新的逻辑。唤醒的目的是通过人为触发一个事件（例如向 eventFd_ 写入数据），使 epoll_wait 提前返回，从而可以检查停止信号并退出循环
 
 
-
+2025/01/07  00: 00
+如何设计更高效的Buffer : Reactor_36_buffer
+     遗留问题 http 协议 如何处理
 
 
 

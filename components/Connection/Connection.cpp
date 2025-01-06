@@ -157,20 +157,26 @@ void Connection::onMessage(){
 
             */
 
+           std::string message;
+
             while (true)
             {
-                ////////////////////////////////////////////////////////////
-                //// 这段是 定制的 报文头是 4 个字节 ///////////////// 之后要改成 Buffer类
-                // 可以把以下代码封装在Buffer类中，还可以支持固定长度、指定报文长度和分隔符等多种格式。
-                int len;
-                memcpy(&len, inputBuffer_.data(), 4);     // 从inputbuffer中获取报文头部。
-                // 如果inputbuffer中的数据量小于报文头部，说明inputbuffer中的报文内容不完整。
-                if (inputBuffer_.size()<len+4) break;
+                // ////////////////////////////////////////////////////////////
+                // //// 这段是 定制的 报文头是 4 个字节 ///////////////// 之后要改成 Buffer类
+                // // 可以把以下代码封装在Buffer类中，还可以支持固定长度、指定报文长度和分隔符等多种格式。
+                // int len;
+                // memcpy(&len, inputBuffer_.data(), 4);     // 从inputbuffer中获取报文头部。
+                // // 如果inputbuffer中的数据量小于报文头部，说明inputbuffer中的报文内容不完整。
+                // if (inputBuffer_.size()<len+4) break;
 
-                std::string message(inputBuffer_.data() + 4,len);   // 从inputbuffer中获取一个报文。
-                inputBuffer_.erase(0, len + 4);                                 // 从inputbuffer中删除刚才已获取的报文。
-                ////////////////////////////////////////////////////////////
+                // std::string message(inputBuffer_.data() + 4,len);   // 从inputbuffer中获取一个报文。
+                // inputBuffer_.erase(0, len + 4);                                 // 从inputbuffer中删除刚才已获取的报文。
+                // ////////////////////////////////////////////////////////////
                 
+
+                if(inputBuffer_.pickMessage(message) == false){
+                    break;
+                }
                 printf("recv( eventfd = %d ): %s\n", fd(), message.c_str());
 
                 // std::string message = inputBuffer_.data();
@@ -248,7 +254,7 @@ void Connection::send(const char *data, size_t size)
 // 发送数据; 如果当前线程是 IO 线程，直接调用次函数， 如果是工作线程，将把次函数 传给 IO 线程，由 IO 线程调用
 void Connection::sendInLoop(const char *data,size_t size){
     // outputBuffer_.append(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
-    outputBuffer_.appendWithHearder(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
+    outputBuffer_.appendWithSep(data, size);    // 把需要发送的数据保存到Connection的发送缓冲区中。
 
     // 注册 写事件， 如果 数据缓存区 可以写入 ，那么就立即 发送; 
     clientChannel_->enablewriting();
