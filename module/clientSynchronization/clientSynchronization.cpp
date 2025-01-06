@@ -40,7 +40,11 @@ int clientSynchronization_main(int argc, char *argv[])
     }
 
     printf("connect ok.\n");
-    // printf("开始时间：%d",time(0));
+    printf("开始时间：%d",time(0));
+
+
+
+
 
     // for (int ii=0; ii<100; ii++)
     // {
@@ -67,7 +71,11 @@ int clientSynchronization_main(int argc, char *argv[])
     // }
 
 
-    for (int ii=0; ii<5; ii++)
+
+
+
+    //  有报头的 方式。
+    for (int ii=0; ii<4; ii++)
     {
         // 从命令行输入内容。
 
@@ -91,23 +99,55 @@ int clientSynchronization_main(int argc, char *argv[])
 
     }
 
-    for (int ii=0; ii<100; ii++)
+    for (int ii=0; ii<4; ii++)
     {
         
+        // memset(buf,0,sizeof(buf));
+        // if (recv(sockfd,buf,sizeof(buf),0) <=0)      // 接收服务端的回应。
+        // { 
+        //     printf("read() failed.\n");
+        //     close(sockfd);
+        //     return -1;
+        // }
+
+        // printf("recv:%s\n",buf);
+
+        int len;
+        recv(sockfd,&len,4,0);            // 先读取4字节的报文头部。
+
         memset(buf,0,sizeof(buf));
-        if (recv(sockfd,buf,sizeof(buf),0) <=0)      // 接收服务端的回应。
-        { 
-            printf("read() failed.\n");
-            close(sockfd);
-            return -1;
-        }
+        recv(sockfd,buf,len,0);           // 读取报文内容。
 
         printf("recv:%s\n",buf);
 
-
-
     }
 
+
+
+
+    //  没有报头的 方式。
+
+    /*
+
+    for (int ii=0; ii<4; ii++)
+    {
+        // 从命令行输入内容。
+
+
+        memset(buf,0,sizeof(buf));
+        sprintf(buf,"这是第%d个 数据。",ii);
+
+        int len=strlen(buf);        // 得到报文长度。
+
+        if (send(sockfd,buf,len,0) <=0)       // 把整个报文的内容发送给服务端。
+        { 
+            printf("write() failed.\n");  
+            close(sockfd);  
+            return -1;
+        }
+        // send(sockfd,tmp,len+4,0);
+    }
+    */
 
     // printf("结束时间：%d",time(0));
 } 
