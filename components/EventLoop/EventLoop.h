@@ -17,6 +17,8 @@
 #include <map>
 #include "Connection.h"
 
+#include <atomic> // 原子操作
+
 /**
  *  每个 事件循环里肯定有一个 epoll 
  */
@@ -60,6 +62,8 @@ class EventLoop
         // 超时事件间隔  参数
         int timeVl_; // 定时器 闹钟 时间间隔
         int timeOut_; // 定时器 超时时间
+
+        std::atomic_bool stop_; // 初始值 为 false ， 如果设置为true， 表示停止事件循环
     
     public:
         EventLoop(bool isMainLoop, int timeVl = 30, int timeOut = 60);
@@ -70,6 +74,7 @@ class EventLoop
 
         // 运行事件循环
         void run();
+        void stop(); // 停止事件循环
 
 
         void updateChannel(Channel *ch);                        // 把channel添加/更新到红黑树上，channel中有fd，也有需要监视的事件。

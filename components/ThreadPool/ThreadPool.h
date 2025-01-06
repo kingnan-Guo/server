@@ -34,6 +34,9 @@ public:
     void addTask(std::function<void()> task);
 
     size_t size();
+
+    // 停止线程
+    void stop();
 };
 
 int ThreadPool_MAIN();

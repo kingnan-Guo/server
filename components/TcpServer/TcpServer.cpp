@@ -341,3 +341,23 @@ void TcpServer::removeConnection(int fd){
     }
     
 };
+
+
+// 停止 IO线程 和 事件循环
+void TcpServer::stop(){
+    // 停止 主事件 循环
+    mainLoop_->stop();
+    printf("主事件循环  stop \n");
+    // 停止从事件 循环
+    for(int i=0;i<threadNum_;i++){
+        subLoop_[i]->stop();
+        
+    }
+    printf("从事件循环  stop \n");
+
+    // 停止 IO 线程, 停止 线程池
+    threadPool_.stop();
+    printf("停止 IO 线程, 停止 线程池   \n");
+
+
+}

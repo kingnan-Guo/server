@@ -51,8 +51,13 @@ ThreadPool::ThreadPool(size_t threadNum, const std::string& threadType):stop_(fa
     }
 }
 
-ThreadPool::~ThreadPool()
-{
+
+
+void ThreadPool::stop(){
+
+    if(stop_){
+        return;
+    }
     stop_ = true;
 
     // 唤醒所有的线程
@@ -63,7 +68,14 @@ ThreadPool::~ThreadPool()
     for(std::thread &th : threads_) {
         th.join();
     }
+};
 
+
+
+
+ThreadPool::~ThreadPool()
+{
+    stop();
 }
 
 
@@ -94,6 +106,17 @@ void ThreadPool::addTask(std::function<void()> task){
 size_t ThreadPool::size(){
     return threads_.size();
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 

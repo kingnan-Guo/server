@@ -50,8 +50,9 @@ class TcpServer{
         TcpServer(const std::string &ip, const uint16_t port, int threadNum = 0);
         ~TcpServer();
 
-        // 运行时间循环
+        // 运行 事件 循环
         void start();
+        void stop();// 停止 IO线程 和 事件循环
         void newConnection(std::unique_ptr<Socket> clinetSocket);
 
 

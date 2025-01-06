@@ -117,4 +117,14 @@ void EchoServer::HandleSendComplete(spConnection connection){
 // epoll_wait()超时，在TcpServer类中回调此函数。   
 void EchoServer::HandleTimeOut(EventLoop *loop){
     std::cout << "EchoServer timeout." << std::endl;
-};                    
+};
+
+
+// 
+void EchoServer::Stop(){
+    // 停止 工作线程； 工作线程 threadPool_ 是 EchoServer 的成员变量，
+    threadPool_.stop();
+    printf("工作线程  stop\n");
+    // 停止 IO 线程 （事件循环）
+    tcpServer_.stop();
+}

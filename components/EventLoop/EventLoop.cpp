@@ -32,7 +32,8 @@ EventLoop::EventLoop(bool isMainLoop, int timerVl, int timerOut):
     timerChannel_(new Channel(this, timerFd_)),
     isMainLoop_(isMainLoop),
     timeVl_(timerVl),
-    timeOut_(timerOut)
+    timeOut_(timerOut),
+    stop_(false)
 {
 
     // 设置 读 回调
@@ -90,7 +91,8 @@ void EventLoop::run(){
     // }
 
     // 改造后
-    while (true)        // 事件循环。
+    // while (true)        // 事件循环。
+    while (stop_ == false)        // 事件循环。
     {
 
         
@@ -258,4 +260,10 @@ void EventLoop::newConnection(spConnection connection){
 void EventLoop::setTimerCallBack(std::function<void(int)> cb){
     timerCallBack_ = cb;
 };
+
+// 停止事件循环的函数
+void EventLoop::stop(){
+    stop_ = true;
+}; 
+
 

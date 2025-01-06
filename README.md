@@ -308,6 +308,22 @@ Connection 类： Reactor_13_add_Connection_class
 
 
 
+2025/01/06 22:14 
+如何让多线程的网络服务程序体面的退出 Reactor_35_exit_tcp_server
+     步骤
+          1、首先设置 2 和 15 的信号
+          2、在信号处理函数中 停止主从事件 循环 和工作线程
+          3、服务程序 主动退出
+
+     实现
+          1、在 TcpServer 中 增加 退出标志位 退出标志位
+          2、在 Thread Pool 中 增加
+          3、 在 EventLoop 中 增加 EventLoop::stop()， stop_=true，即便是停止循环，但是也会阻塞到 epoll_wait 中，所以需要唤醒事件循环
+          4、 EventLoop::stop() 中要 唤醒事件循环 ， wakeup() 使用 eventFd_ 唤醒 事件循环， 为什么要唤醒事件循环？ 因为 stop() 是在 主线程中调用的，而 epoll_wait 是在 从线程中调用的，所以需要唤醒事件循环，让 epoll_wait 退出，然后才能执行 stop() 中的代码， 为什么唤醒才能退出 epoll_wait ？？如果不唤醒，从线程会一直停留在 epoll_wait 中，无法执行任何新的逻辑。唤醒的目的是通过人为触发一个事件（例如向 eventFd_ 写入数据），使 epoll_wait 提前返回，从而可以检查停止信号并退出循环
+
+
+
+
 
 
 
