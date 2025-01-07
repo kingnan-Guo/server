@@ -108,7 +108,7 @@ void EchoServer::HandleMessage(spConnection connection, std::string& message){
 
 
 void EchoServer::OnMessage(spConnection connection, std::string& message){
-    sleep(2);
+    // sleep(2);
     std::cout << "OnMessage 处理业务完成  要调用 connection " << message << std::endl;
     message = " server echo " + message;
     connection->send(message.data(),message.size());
@@ -146,3 +146,4 @@ void EchoServer::HandleRemove(int fd){
     std::lock_guard<std::mutex> gd(userMapMutex_);
     userMap_.erase(fd);
 }
+

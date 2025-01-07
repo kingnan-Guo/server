@@ -58,7 +58,7 @@ int  TCPEPOLL(int argc,char *argv[])
      *  work 线程个数
      * 
      */
-    echoserver = new EchoServer(argv[1],atoi(argv[2]), 2, 3);
+    echoserver = new EchoServer(argv[1],atoi(argv[2]), 3, 3);
     // EchoServer echoserver(argv[1],atoi(argv[2]), 3, 0);
 
     echoserver->Start();      
