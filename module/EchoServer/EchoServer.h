@@ -6,13 +6,27 @@
 #include "ThreadPool.h"
 
 
+class UserInfo  // 用户信息（状态机）。
+{
+    private:
+        int fd_;                      // 客户端的fd。
+        std::string ip_;           // 客户端的ip地址。
+        bool login_=false;    // 客户端登录的状态：true-已登录；false-未登录。
+    public:
+        UserInfo(int fd,const std::string &ip):fd_(fd),ip_(ip) {}
+        void setLogin(bool login) { login_=login; }
+        bool Login() { return login_; }
+};
 
 
 class EchoServer
 {
     private:
+        using spUserInfo = std::shared_ptr<UserInfo>;
         TcpServer tcpServer_;
         ThreadPool threadPool_;// 工作线程池 
+        std::mutex userMapMutex_;
+        std::map<int, spUserInfo> userMap_; // 用户信息表
     public:
         EchoServer(const std::string &ip, const uint16_t port, int subThreadNum = 2, int workThreadNum = 3);
         ~EchoServer();

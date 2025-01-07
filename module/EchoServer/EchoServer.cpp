@@ -142,4 +142,7 @@ void EchoServer::Stop(){
 
 void EchoServer::HandleRemove(int fd){
     std::cout << "HandleRemove. fd ="<< fd << std::endl;
+    // 从 userMap_ 中删除 fd
+    std::lock_guard<std::mutex> gd(userMapMutex_);
+    userMap_.erase(fd);
 }
