@@ -35,6 +35,12 @@ EchoServer::EchoServer(const std::string &ip, const uint16_t port, int subThread
         std::bind(&EchoServer::HandleTimeOut, this, std::placeholders::_1)
     );
 
+    // HandleRemove
+    tcpServer_.setRemoveConnectionCallBack(
+        std::bind(&EchoServer::HandleRemove, this, std::placeholders::_1)
+    );
+
+
 }
 
 EchoServer::~EchoServer()
@@ -115,7 +121,8 @@ void EchoServer::OnMessage(spConnection connection, std::string& message){
 // 数据发送完成后，在TcpServer类中回调此函数。
 void EchoServer::HandleSendComplete(spConnection connection){
     std::cout << "Message send complete." << std::endl;
-};     
+};
+
 // epoll_wait()超时，在TcpServer类中回调此函数。   
 void EchoServer::HandleTimeOut(EventLoop *loop){
     std::cout << "EchoServer timeout." << std::endl;
@@ -129,4 +136,10 @@ void EchoServer::Stop(){
     printf("工作线程  stop\n");
     // 停止 IO 线程 （事件循环）
     tcpServer_.stop();
+}
+
+
+
+void EchoServer::HandleRemove(int fd){
+    std::cout << "HandleRemove. fd ="<< fd << std::endl;
 }

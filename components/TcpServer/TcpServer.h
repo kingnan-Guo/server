@@ -43,7 +43,8 @@ class TcpServer{
         std::function<void(spConnection,std::string &message)> onMessageCallBack_;        // 回调EchoServer::HandleMessage()。
         std::function<void(spConnection)> sendCompleteCallBack_;                 // 回调EchoServer::HandleSendComplete()。
         std::function<void(EventLoop*)>  timeOutCallBack_;                       // 回调EchoServer::HandleTimeOut()。
-
+        // 客户端连接超时 回调
+        std::function<void(int)>  removeConnectionCallBack_;
 
     public:
         // 需要把 ip 和 端口 传进来
@@ -76,6 +77,8 @@ class TcpServer{
         void setOnMessageCallBack(std::function<void(spConnection,std::string & message)> onMessageCallBack);
         void setSendCompleteCallBack(std::function<void(spConnection)> sendCompleteCallBack);
         void setTimeOutCallBack(std::function<void(EventLoop*)> timeOutCallBack);
+        // 客户端连接超时 回调
+        void setRemoveConnectionCallBack(std::function<void(int)> removeConnectionCallBack);
 
         // 删除 fd 的回调函数
         void removeConnection(int fd);

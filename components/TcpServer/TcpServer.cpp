@@ -331,6 +331,12 @@ void TcpServer::setTimeOutCallBack(std::function<void(EventLoop*)> timeOutCallBa
     timeOutCallBack_ = timeOutCallBack;
 };
 
+// 设置连接移除回调函数
+void TcpServer::setRemoveConnectionCallBack(std::function<void(int)> removeConnectionCallBack){
+    removeConnectionCallBack_ = removeConnectionCallBack;
+};
+
+
 // 从 map 中删除 connection 对象
 void TcpServer::removeConnection(int fd){
     printf("TcpServer::removeConnection() thread is %d.\n",syscall(SYS_gettid));
@@ -338,6 +344,9 @@ void TcpServer::removeConnection(int fd){
         // 
         std::lock_guard<std::mutex> gd(connectionsMapMutex_);// 加锁
         connections_.erase(fd);
+
+        // 回调
+        if (removeConnectionCallBack_) removeConnectionCallBack_(fd);
     }
     
 };
