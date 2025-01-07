@@ -2,5 +2,5 @@
 #define __SYLAR_TEMP_H
 
 // 定义命名空间
-int timerfdAndSigefdDemo(int argc,char *argv[]);
+int TCPEPOLL_SIMPORE(int argc,char *argv[]);
 #endif

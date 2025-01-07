@@ -1,5 +1,4 @@
-#include "EchoServer.h"
-#include <signal.h>
+#include "TCPEPOLL.h"
 
 
   //  1、首先设置 2 和 15 的信号
@@ -24,7 +23,7 @@ void stop(int sig){
 }
 
 
-int tcpepoll4(int argc,char *argv[])
+int  TCPEPOLL(int argc,char *argv[])
 {
     if (argc != 3) 
     { 

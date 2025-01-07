@@ -20,29 +20,12 @@ include_directories(
     components/Connection   # Connection 类
     components/Buffer       # Buffer 类 , 数据缓冲区
     components/TimeStamp        # 定时器类
-
-
     components/ThreadPool   # 线程池 Demo
 
 
-
+    # 业务层
     module/EchoServer # 回显服务器
-
-    # 网络相关 =========
-    module/netserver # 线程
-    module/netserver2 # 线程
-    module/netserver3 # 线程
-
-
-    module/netserver4 # EchoServer 启动函数
-
-
-
-    # DEMO
-    module/EVENTFD # eventFd demo
-    module/PIPE # eventFd PIPE
-    module/timerfdAndSigefdDemo # 定时器 fd 和 信号 fd Demo
-
+    module/TCPEPOLL # EchoServer 启动函数
 
     # 动态库 =========
     # /lib/print_t# 指定动态链接库的目录

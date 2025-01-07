@@ -15,17 +15,13 @@
 #include <netinet/tcp.h>      // TCP_NODELAY需要包含这个头文件。
 
 
-#include <sys/timerfd.h>      // 定时器需要包含这个头文件。
-#include <signal.h>                // 信号需要包含这个头文件。
-#include <sys/signalfd.h>     // 信号fd需要包含这个头文件。
-
 // 设置非阻塞的IO。
-void setnonblocking5(int fd)
+void setnonblocking1(int fd)
 {
     fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
 }
 
-int timerfdAndSigefdDemo(int argc,char *argv[])
+int TCPEPOLL_SIMPORE(int argc,char *argv[])
 {
     if (argc != 3) 
     { 
@@ -74,7 +70,7 @@ int timerfdAndSigefdDemo(int argc,char *argv[])
     
     setsockopt(listenfd,SOL_SOCKET,SO_KEEPALIVE   ,&opt,static_cast<socklen_t>(sizeof opt));    // 可能有用，但是，建议自己做心跳。
 
-    setnonblocking5(listenfd);    // 把服务端的listenfd设置为非阻塞的。
+    setnonblocking1(listenfd);    // 把服务端的listenfd设置为非阻塞的。
 
     struct sockaddr_in servaddr;                                  // 服务端地址的结构体。
     servaddr.sin_family = AF_INET;                              // IPv4网络协议的套接字类型。
@@ -102,115 +98,6 @@ int timerfdAndSigefdDemo(int argc,char *argv[])
 
     struct epoll_event evs[10];      // 存放epoll_wait()返回事件的数组。
 
-
-
-
-
-    /////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////
-
-
-
-    /**
-     * 把定时器 加入到 epoll
-     * 
-     * 新版本的Linux内核支持 epoll timerfd，它允许将定时器事件添加到 epoll 实例中，从而实现高效的事件驱动定时器功能。
-     * 
-     * timerfd_create() 函数创建一个 timerfd，并将其添加到 epoll 实例中，以便在定时器到期时接收通知。
-     *      paranms : 
-     *          clockid 指定了定时器的时钟源，可以是 CLOCK_REALTIME （系统时钟）或 CLOCK_MONOTONIC （单调时钟） (常用)。
-     *           flags 可以指定定时器的行为，例如一次性定时器或周期性定时器。
-     *                  参数
-     *                       0：创建一个一次性定时器，定时器到期后不再自动重置。
-     *                       TFD_NONBLOCK ：将文件描述符设置为非阻塞模式。
-     *                       TFD_CLOEXEC ：在执行 exec() 系统调用时关闭文件描述符。
-     *                          
-     *      返回值：
-     *           成功时，timerfd_create() 返回一个文件描述符，用于访问定时器。如果失败，则返回 -1，并设置 errno。
-     * 
-     * 
-     * timerfd_settime() 函数设置定时器的初始值和周期。参数 flags 可以指定定时器的行为，例如一次性定时器或周期性定时器。
-     *      params:
-     *               timerid 是 timerfd_create() 返回的文件描述符。
-     *               itimerspec 结构体指定了定时器的初始值和周期。itimerspec 结构体包含两个 itimerspec_val 结构体，分别指定了定时器的初始值和周期。
-     *               flags 可以指定定时器的行为，例如一次性定时器或周期性定时器。
-     *      返回值：
-     *             成功时，timerfd_settime() 返回 0。如果失败，则返回 -1，并设置 errno。
-     * 
-     * 
-     * 
-    */
-
-    // 创建一个 timerfd。
-    int timerFd = timerfd_create(CLOCK_MONOTONIC, TFD_CLOEXEC | TFD_NONBLOCK );
-
-    // 设置定时器的初始值和周期。
-    struct itimerspec timeout;
-    // 注释 
-    memset(&timeout, 0, sizeof(struct itimerspec));
-
-    // 设置时间
-    timeout.it_value.tv_sec = 5; // 5秒后触发
-    timeout.it_value.tv_nsec = 0;// 纳秒
-
-    // 开始计时 alarm(5)
-    timerfd_settime(timerFd, 0, &timeout, NULL);
-    // 将 timerfd 添加到 epoll 实例中。
-    ev.data.fd = timerFd; // 指定事件的自定义数据，会随着epoll_wait()返回的事件一并返回。
-    ev.events = EPOLLIN; // 让epoll监视timerfd的读事件，采用水平触发。
-
-    // 把定时器 fd 加入 epoll
-    epoll_ctl(epollfd, EPOLL_CTL_ADD, timerFd, &ev); 
-
-
-    
-
-
-    ///////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////
-
-    /**
-     * 把信号加入 epoll
-     * 
-     * 
-     * 
-    */
-
-    // 创建一个信号描述符。
-    sigset_t sigset;
-    // 初始化（ 清空 ）信号集！！！
-    sigemptyset(&sigset);
-    // 把 SIGINT 添加到信号集中。
-    sigaddset(&sigset, SIGINT);
-    // 把SIGTERM信号加入信号集。
-    sigaddset(&sigset, SIGTERM);
-
-    // 对当前进程屏蔽信号集 （当前进程将收不到 信号集 中的信号）
-    sigprocmask(SIG_BLOCK, &sigset, NULL);
-
-    // 创建 信号集的 fd
-    int sigFd = signalfd(-1, &sigset, 0);
-
-    // 为 SIGINT 和 SIGTERM 准备读事件，并添加到epoll中。
-    ev.data.fd = sigFd; // 指定事件的自定义数据，会随着epoll_wait()返回的事件一并返回。
-    ev.events = EPOLLIN; // 让epoll监视timerfd的读事件，采用水平触发。
-
-    // 把信号 fd 加入 epoll
-    epoll_ctl(epollfd, EPOLL_CTL_ADD, sigFd, &ev);
-
-
-    ///////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
     while (true)        // 事件循环。
     {
         int infds=epoll_wait(epollfd,evs,10,-1);       // 等待监视的fd有事件发生。
@@ -230,7 +117,7 @@ int timerfdAndSigefdDemo(int argc,char *argv[])
         // 如果infds>0，表示有事件发生的fd的数量。
         for (int ii=0;ii<infds;ii++)       // 遍历epoll返回的数组evs。
         {
-            if (evs[ii].data.fd == listenfd)   // 如果是listenfd有事件，表示有新的客户端连上来。
+            if (evs[ii].data.fd==listenfd)   // 如果是listenfd有事件，表示有新的客户端连上来。
             {
 
 
@@ -238,7 +125,7 @@ int timerfdAndSigefdDemo(int argc,char *argv[])
                 struct sockaddr_in clientaddr;
                 socklen_t len = sizeof(clientaddr);
                 int clientfd = accept(listenfd,(struct sockaddr*)&clientaddr,&len);
-                setnonblocking5(clientfd);         // 客户端连接的fd必须设置为非阻塞的。
+                setnonblocking1(clientfd);         // 客户端连接的fd必须设置为非阻塞的。
 
                 printf ("accept client(fd=%d,ip=%s,port=%d) ok.\n",clientfd,inet_ntoa(clientaddr.sin_addr),ntohs(clientaddr.sin_port));
 
@@ -249,36 +136,7 @@ int timerfdAndSigefdDemo(int argc,char *argv[])
                 ////////////////////////////////////////////////////////////////////////
 
             }
-            // 收到 定时器fd 的事件。
-            else if(evs[ii].data.fd == timerFd) {
-                printf("定时器fd有事件发生\n");
-
-                // 重新计时，这样就会开始下一次循环 
-                timerfd_settime(timerFd, 0, &timeout, 0);
-
-                // 读取定时器fd，这样就不会阻塞。
-                uint64_t exp;
-                read(timerFd, &exp, sizeof(exp));
-                printf("读取 定时器 = %d \n", exp);
-
-                printf("在这里编写处理定时器的代码 。。。。。。。。\n");
-                continue;
-            }
-            // 收到 信号fd 的事件。
-            else if(evs[ii].data.fd == sigFd) {
-
-                struct signalfd_siginfo sigInfo;
-
-                // 读取信号fd，这样就不会阻塞。
-                int s = read(sigFd, &sigInfo, sizeof(struct signalfd_siginfo));
-                printf("收到了信号 = %d \n", sigInfo.ssi_signo);
-                
-                // 在这里编写处理信号的代码 。。。。。。。。。
-                continue;
-
-            }
-
-            else  // 如果是客户端连接的fd有事件。
+            else                                        // 如果是客户端连接的fd有事件。
             {
 
                 ////////////////////////////////////////////////////////////////////////
@@ -335,7 +193,3 @@ int timerfdAndSigefdDemo(int argc,char *argv[])
 
 
 //  ./Reactor 127.0.0.1  8080
-
-// killall -9 Reactor 停止进程
-
-// killall -2 Reactor 发送信号2，表示SIGINT，ctrl+c
