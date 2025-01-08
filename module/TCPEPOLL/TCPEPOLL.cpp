@@ -1,5 +1,5 @@
 #include "TCPEPOLL.h"
-
+#include "Router.h"
 
   //  1、首先设置 2 和 15 的信号
   //  2、在信号处理函数中 停止主从事件 循环 和工作线程
@@ -61,7 +61,14 @@ int  TCPEPOLL(int argc,char *argv[])
     echoserver = new EchoServer(argv[1],atoi(argv[2]), 3, 3);
     // EchoServer echoserver(argv[1],atoi(argv[2]), 3, 0);
 
-    echoserver->Start();      
+    echoserver->Start();
+
+
+
+
+
+
+
 
   return 0;
 }

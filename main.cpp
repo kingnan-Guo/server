@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "SQLITE.h"
 #include "TCPEPOLL.h"
+#include "Router.h"
 
 
 
@@ -12,6 +13,7 @@ int main(int arch, char* argv[])
     TCPEPOLL(arch, argv);  // EchoServer DEMO
     // SQLITE_MAIN();
 
+    // ROUTER_MAIN();
     return 0;
 }
 

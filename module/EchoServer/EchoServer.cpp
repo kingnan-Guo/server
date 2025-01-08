@@ -1,5 +1,5 @@
 #include "EchoServer.h"
-
+#include "Router.h"
 
 /**
  * 
@@ -90,17 +90,118 @@ void EchoServer::HandleMessage(spConnection connection, std::string& message){
     // connection->send(message.data(),message.size());
 
 
-    // 这里是将 收到的数据 又 发送回去，正常业务中 不是这样的，这里只是为了测试
-    // 判断 工作线程池的大小
-    if(threadPool_.size() == 0){ // 没有工作线程，那么直接调用 IO 线程
-        OnMessage(connection, message);
+    // 模拟请求
+    // HttpRequestPtr req = std::make_shared<HttpRequest>();
+    // HttpResponsePtr resp = std::make_shared<HttpResponse>();
+    // Router router;
+
+    // router.GetRoute(req, resp);
+
+
+
+    // router.POST("/echo", [](const HttpRequestPtr& req, const HttpResponsePtr& resp) {
+    //     resp->Write("Echo: " + req->body);
+    //     resp->Send();
+    // });
+
+    Router router;
+
+    router.GET("/hello", [this, &connection](const HttpRequestPtr& req, const HttpResponsePtr& resp) {
+        // 先发送响应头，告诉客户端请求已收到，正在处理中
+        // 先发送响应头，告诉客户端请求已收到，正在处理中
+
+
+    resp->SetHeader("Content-Type", "application/json");
+    resp->SetHeader("X-Status", "Processing");
+    
+    // 保证连接保持活跃
+    resp->SetHeader("Connection", "keep-alive");
+
+    // 发送响应头（客户端接收到这个后可以开始处理）
+    std::ostringstream initial_response;
+    initial_response << "HTTP/1.1 " << resp->status_code << " " << resp->GetStatusMessage() << "\r\n";
+    for (const auto& header : resp->headers) {
+        initial_response << header.first << ": " << header.second << "\r\n";
     }
-    else{ // 有工作线程，那么把业务放到 线程池 的任务队列中
-        // 把业务放到 线程池 的任务队列中
-        threadPool_.addTask(
-            std::bind(&EchoServer::OnMessage, this, connection, message)
-        );
+    initial_response << "\r\n";  // 空行表示头部结束
+
+
+
+
+        // 发送响应头（客户端接收到这个后可以开始处理）
+        std::string responseStr = initial_response.str();
+
+        std::cout << responseStr;
+  
+        OnMessage(connection, responseStr);
+        // std::this_thread::sleep_for(std::chrono::seconds(2));
+        
+
+
+
+        // 设置响应体（JSON 数据）
+        std::string jsonResponse = "{\"message\":\"Data processed successfully!\"}";
+        resp->String(jsonResponse);  // 设置响应体内容
+        resp->SetHeader("Content-Type", "application/json");
+        // 发送响应头和响应体
+        std::ostringstream final_response;
+        final_response << "HTTP/1.1 " << resp->status_code << " " << resp->GetStatusMessage() << "\r\n";
+        for (const auto& header : resp->headers) {
+            final_response << header.first << ": " << header.second << "\r\n";
+        }
+        final_response << "\r\n";  // 空行表示头部结束
+        final_response << resp->body;  // 响应体内容
+
+
+
+
+
+
+        std::string finalsesponse = final_response.str();
+        OnMessage(connection, finalsesponse);
+
+
+
+    });
+
+
+
+
+    HttpRequest request;
+    HttpRequestPtr req = std::make_shared<HttpRequest>();
+    HttpResponsePtr resp = std::make_shared<HttpResponse>();
+    if (req->parse(message)) {
+        req->printRequest();
+        // req->method = request.method;
+        // req->url = request.url;
+        // req->body = request.body;
+        // req->headers = request.headers;
+        // req->path = request.path;
+
+        // std::shared_ptr<HttpResponse>;
+
+        router.GetRoute(req, resp);
+
+    } else {
+        std::cerr << "Failed to parse request." << std::endl;
+
+ 
+
+
     }
+
+
+    // // 这里是将 收到的数据 又 发送回去，正常业务中 不是这样的，这里只是为了测试
+    // // 判断 工作线程池的大小
+    // if(threadPool_.size() == 0){ // 没有工作线程，那么直接调用 IO 线程
+    //     OnMessage(connection, message);
+    // }
+    // else{ // 有工作线程，那么把业务放到 线程池 的任务队列中
+    //     // 把业务放到 线程池 的任务队列中
+    //     threadPool_.addTask(
+    //         std::bind(&EchoServer::OnMessage, this, connection, message)
+    //     );
+    // }
 
 };
 

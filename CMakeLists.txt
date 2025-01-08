@@ -27,6 +27,17 @@ include_directories(
     module/EchoServer # 回显服务器
     module/TCPEPOLL # EchoServer 启动函数
 
+
+
+
+    # WebServer
+    WebServer/HttpServer
+    WebServer/Router
+
+
+
+
+
     module/OTHER/SQLITE
 
     # 动态库 =========
@@ -35,7 +46,7 @@ include_directories(
 )
 
 
-file(GLOB_RECURSE MODULE  "module/*.*" "components/*.*" "module/OTHER/*.*")
+file(GLOB_RECURSE MODULE  "module/*.*" "components/*.*" "WebServer/*.*" "module/OTHER/*.*")
 
 file(GLOB_RECURSE SOURCES main.cpp)
 
