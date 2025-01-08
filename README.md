@@ -341,7 +341,8 @@ Connection 类： Reactor_13_add_Connection_class
 2025/01/07  13:00
 整理代码框架： Reactor_framework_base
 
-
+2025/01/08  12:00
+添加 SQLite Demo： Reactor_framework_add_sqlite
      
 
 
@@ -465,3 +466,34 @@ git config --global user.email "373734199@qq.com"
 <!-- git remote add origin git@github.com:zhangyue/leetcode.git
 
 git push -u origin master -->
+
+
+
+
+
+
+
+
+./Reactor 172.27.124.240  8080
+
+
+
+
+# 安装 mySql
+首先，你需要安装 MySQL 的官方 Yum 存储库。你可以使用以下命令来下载并安装它：
+rpm -Uvh https://repo.mysql.com/mysql80-community-release-el7-3.noarch.rpm
+sudo yum install mysql-server
+sudo yum install mysql-community-server
+
+
+sudo systemctl start mysqld
+sudo systemctl enable mysqld
+
+
+
+rpm -qa | grep mysql
+
+
+sudo yum clean all
+sudo yum install mysql-community-server
+sudo yum remove mysql mysql-server mysql-community-server

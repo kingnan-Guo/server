@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdio.h>
+#include "SQLITE.h"
 #include "TCPEPOLL.h"
 
 
@@ -8,9 +9,8 @@
 int main(int arch, char* argv[])
 {
     printf("Reactor star \r\n");
-
     TCPEPOLL(arch, argv);  // EchoServer DEMO
-
+    // SQLITE_MAIN();
 
     return 0;
 }

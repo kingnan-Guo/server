@@ -70,11 +70,11 @@ void EchoServer::HandleError(spConnection connection){
     std::cout << "EchoServer conn error." << std::endl;
 };     
 
-// 处理客户端的请求报文，在TcpServer类中回调此函数。
+// 处理客户端的请求报文，在TcpServer类中回调此函数。 这里是接收数据，
 void EchoServer::HandleMessage(spConnection connection, std::string& message){
 
 
-    std::cout << "HandleMessage   thread id : " << syscall(SYS_gettid) << " message : " << message << std::endl;
+    std::cout << "HandleMessage   thread id : " << syscall(SYS_gettid) << " message :\n" << message << std::endl;
     // 在这里，将经过若干步骤的运算。
     // std::cout << "HandleMessage   data: " << message << std::endl;
     // 将运算结果返回给客户端
@@ -102,16 +102,14 @@ void EchoServer::HandleMessage(spConnection connection, std::string& message){
         );
     }
 
-
-
 };
 
 
 void EchoServer::OnMessage(spConnection connection, std::string& message){
     // sleep(2);
     std::cout << "OnMessage 处理业务完成  要调用 connection " << message << std::endl;
-    message = " server echo " + message;
-    connection->send(message.data(),message.size());
+    // message = " server echo " + message;
+    connection->send(message.data(), message.size());
 }
 
 

@@ -27,24 +27,28 @@ include_directories(
     module/EchoServer # 回显服务器
     module/TCPEPOLL # EchoServer 启动函数
 
+    module/OTHER/SQLITE
+
     # 动态库 =========
     # /lib/print_t# 指定动态链接库的目录
 
 )
 
 
-file(GLOB_RECURSE MODULE  "module/*.*" "components/*.*" )
+file(GLOB_RECURSE MODULE  "module/*.*" "components/*.*" "module/OTHER/*.*")
 
 file(GLOB_RECURSE SOURCES main.cpp)
 
 # 查找线程库
 find_package(Threads REQUIRED)
 
+# sqlite 数据库
+find_package(SQLite3 REQUIRED)
 
 add_executable(Reactor ${SOURCES} ${MODULE})
 
 # 链接线程库
-target_link_libraries(Reactor PRIVATE Threads::Threads)
+target_link_libraries(Reactor PRIVATE Threads::Threads SQLite::SQLite3)
 
 
 
