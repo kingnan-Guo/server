@@ -104,26 +104,26 @@ void EchoServer::HandleMessage(spConnection connection, std::string& message){
     //     resp->Send();
     // });
 
-    Router router;
+        Router router;
 
-    router.GET("/hello", [this, &connection](const HttpRequestPtr& req, const HttpResponsePtr& resp) {
-        // 先发送响应头，告诉客户端请求已收到，正在处理中
-        // 先发送响应头，告诉客户端请求已收到，正在处理中
+        router.GET("/hello", [this, &connection](const HttpRequestPtr& req, const HttpResponsePtr& resp) {
+            // 先发送响应头，告诉客户端请求已收到，正在处理中
+            // 先发送响应头，告诉客户端请求已收到，正在处理中
 
 
-    resp->SetHeader("Content-Type", "application/json");
-    resp->SetHeader("X-Status", "Processing");
-    
-    // 保证连接保持活跃
-    resp->SetHeader("Connection", "keep-alive");
+        resp->SetHeader("Content-Type", "application/json");
+        resp->SetHeader("X-Status", "Processing");
+        
+        // 保证连接保持活跃
+        resp->SetHeader("Connection", "keep-alive");
 
-    // 发送响应头（客户端接收到这个后可以开始处理）
-    std::ostringstream initial_response;
-    initial_response << "HTTP/1.1 " << resp->status_code << " " << resp->GetStatusMessage() << "\r\n";
-    for (const auto& header : resp->headers) {
-        initial_response << header.first << ": " << header.second << "\r\n";
-    }
-    initial_response << "\r\n";  // 空行表示头部结束
+        // 发送响应头（客户端接收到这个后可以开始处理）
+        std::ostringstream initial_response;
+        initial_response << "HTTP/1.1 " << resp->status_code << " " << resp->GetStatusMessage() << "\r\n";
+        for (const auto& header : resp->headers) {
+            initial_response << header.first << ": " << header.second << "\r\n";
+        }
+        initial_response << "\r\n";  // 空行表示头部结束
 
 
 
@@ -133,35 +133,39 @@ void EchoServer::HandleMessage(spConnection connection, std::string& message){
 
         std::cout << responseStr;
   
-        OnMessage(connection, responseStr);
-        std::this_thread::sleep_for(std::chrono::seconds(2));
-        
-
-
+        // OnMessage(connection, responseStr);
+        PreparationSend(connection, responseStr);
+        // std::this_thread::sleep_for(std::chrono::seconds(4));
+        // sleep(4);
 
         // 设置响应体（JSON 数据）
-        std::string jsonResponse = "{\"message\":\"Data processed successfully!\"}";
-        // resp->String(jsonResponse);  // 设置响应体内容
-        // resp->SetHeader("Content-Type", "application/json");
-        // // 发送响应头和响应体
-        // std::ostringstream final_response;
-        // final_response << "HTTP/1.1 " << resp->status_code << " " << resp->GetStatusMessage() << "\r\n";
-        // for (const auto& header : resp->headers) {
-        //     final_response << header.first << ": " << header.second << "\r\n";
+        // std::string jsonResponse = "{\"message\":\"Data processed successfully!\"}";
+
+        std::string jsonResponse = R"({
+            "data": {
+                "info": {
+                    "message": "Data processed successfully!",
+                    "timestamp": "2023-10-01T12:00:00Z"
+                },
+            }
+        })";
+        // if(threadPool_.size() == 0){ // 没有工作线程，那么直接调用 IO 线程
+        //     OnMessage(connection, jsonResponse);
         // }
-        // final_response << "\r\n";  // 空行表示头部结束
-        // final_response << resp->body;  // 响应体内容
+        // else{ // 有工作线程，那么把业务放到 线程池 的任务队列中
+        //     // 把业务放到 线程池 的任务队列中
+        //     threadPool_.addTask(
+        //         std::bind(&EchoServer::OnMessage, this, connection, jsonResponse)
+        //     );
+        // }
+        PreparationSend(connection, jsonResponse);
+        // 发送完数据 关闭连接
+        // sleep(2);
 
+        // connection->closeCallBack(); // 关闭连接
+        // tcpServer_.closeEventLoopConnection(connection);
 
-
-
-
-
-        // std::string finalsesponse = final_response.str();
-        OnMessage(connection, jsonResponse);
-
-
-
+        
     });
 
 
@@ -172,21 +176,10 @@ void EchoServer::HandleMessage(spConnection connection, std::string& message){
     HttpResponsePtr resp = std::make_shared<HttpResponse>();
     if (req->parse(message)) {
         req->printRequest();
-        // req->method = request.method;
-        // req->url = request.url;
-        // req->body = request.body;
-        // req->headers = request.headers;
-        // req->path = request.path;
-
-        // std::shared_ptr<HttpResponse>;
-
         router.GetRoute(req, resp);
 
     } else {
         std::cerr << "Failed to parse request." << std::endl;
-
- 
-
 
     }
 
@@ -206,11 +199,26 @@ void EchoServer::HandleMessage(spConnection connection, std::string& message){
 };
 
 
+// 
+void EchoServer::PreparationSend(spConnection connection, std::string& message){
+    if(threadPool_.size() == 0){ // 没有工作线程，那么直接调用 IO 线程
+        OnMessage(connection, message);
+    }
+    else{ // 有工作线程，那么把业务放到 线程池 的任务队列中
+        // 把业务放到 线程池 的任务队列中
+        threadPool_.addTask(
+            std::bind(&EchoServer::OnMessage, this, connection, message)
+        );
+    }
+}
+
+
 void EchoServer::OnMessage(spConnection connection, std::string& message){
     // sleep(2);
-    std::cout << "OnMessage 处理业务完成  要调用 connection " << message << std::endl;
+    // std::cout << "OnMessage 处理业务完成  要调用 connection " << message << std::endl;
     // message = " server echo " + message;
     connection->send(message.data(), message.size());
+    
 }
 
 
@@ -220,6 +228,9 @@ void EchoServer::OnMessage(spConnection connection, std::string& message){
 // 数据发送完成后，在TcpServer类中回调此函数。
 void EchoServer::HandleSendComplete(spConnection connection){
     std::cout << "Message send complete." << std::endl;
+
+
+    tcpServer_.closeEventLoopConnection(connection);
 };
 
 // epoll_wait()超时，在TcpServer类中回调此函数。   

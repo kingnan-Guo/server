@@ -82,4 +82,7 @@ class TcpServer{
 
         // 删除 fd 的回调函数
         void removeConnection(int fd);
+
+        // 关闭 指定的  fd 的连接
+        void closeEventLoopConnection(spConnection connection);
 };

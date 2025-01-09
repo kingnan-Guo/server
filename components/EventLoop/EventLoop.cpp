@@ -103,6 +103,7 @@ void EventLoop::run(){
 
         // 在事件循环中 判断 channels 是否为空, 如果为空，表示 超时
         if(channels.size() == 0){
+            printf("EventLoop::run() 事件循环 超时 \n");
             // 调用回调函数
             epollTimeOutCallBack_(this);
         }
@@ -221,21 +222,24 @@ void EventLoop::handleTimer(){
          printf("alarm  time out  handleTimer() 主  线程id thread id  = %d \n", syscall(SYS_gettid));
     } else {
         //  闹钟时间到了， 遍历 ConnectionMap_ ，判断每个 connection 对象是否超时
-        printf("alarm  time out  handleTimer() 从 线程id thread id  = %d  fd = ", syscall(SYS_gettid));
+        // printf("alarm  time out  handleTimer() 从 线程id thread id  = %d  fd = ", syscall(SYS_gettid));
     
         time_t now = time(NULL);
         for(auto &it:ConnectionMap_){
-            printf("%d ", it.first);
+            // printf("%d ", it.first);
             if(it.second->timeOut(now, timeOut_)){
-                {
-                    std::lock_guard<std::mutex> gd(connectionsMapMutex_);// 加锁
-                    // 超时 从容器中删除 connection
-                    ConnectionMap_.erase(it.first);// 也可以 ConnectionMap_.erase(it.second->fd());
-                }
+                closeConnection(it.second);
 
-                if(timerCallBack_){
-                    timerCallBack_(it.first);
-                }
+                // printf("EventLoop::closeConnection()    关闭 与 客户端的 连接  connection ->fd  = %d\n", it.first);
+                // {
+                //     std::lock_guard<std::mutex> gd(connectionsMapMutex_);// 加锁
+                //     // 超时 从容器中删除 connection
+                //     ConnectionMap_.erase(it.first);// 也可以 ConnectionMap_.erase(it.second->fd());
+                // }
+
+                // if(timerCallBack_){
+                //     timerCallBack_(it.first);
+                // }
             }
         }
         printf("\n");
@@ -253,17 +257,45 @@ void EventLoop::newConnection(spConnection connection){
     ConnectionMap_[connection->fd()] = connection;
 };
 
+// 关闭连接; 删除 Connection 到  ConnectionMap_ 中的函数
+void EventLoop::closeConnection(spConnection connection){
+    printf("EventLoop::closeConnection()    关闭 与 客户端的 连接  connection ->fd  = %d\n", connection->fd());
+    {
+        std::lock_guard<std::mutex> gd(connectionsMapMutex_);// 加锁
+        // 超时 从容器中删除 connection
+        ConnectionMap_.erase(connection->fd());// 也可以 ConnectionMap_.erase(it.second->fd());
+    }
+
+    if(timerCallBack_){
+        timerCallBack_(connection->fd());
+    }
+
+};
 
 
 
 // 设置 回调函数的 成员函数 // 将被设置为TcpServer::removeConnectionCallBack()
 void EventLoop::setTimerCallBack(std::function<void(int)> cb){
+    printf("EventLoop::setTimerCallBack()    设置 回调函数的 成员函数\n");
     timerCallBack_ = cb;
 };
 
 // 停止事件循环的函数
 void EventLoop::stop(){
     stop_ = true;
-}; 
+};
+
+// 从 ConnectionMap_ 中 找到 connection
+bool EventLoop::hasConnection(spConnection connection){
+    
+    // std::lock_guard<std::mutex> gd(connectionsMapMutex_);// 加锁
+    if(ConnectionMap_.find(connection->fd()) != ConnectionMap_.end()){
+        // printf("EventLoop::hasConnection()    找到 connection\n");
+        return true;
+    } else {
+        // printf("EventLoop::hasConnection()    没有找到 connection\n");
+        return false;
+    }
+}
 
 

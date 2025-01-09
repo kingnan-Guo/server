@@ -370,3 +370,19 @@ void TcpServer::stop(){
 
 
 }
+
+
+
+void TcpServer::closeEventLoopConnection(spConnection connection){
+    if(connection){
+        // 首先要找到 connection 所在的 subLoop_，然后调用 closeConnection()
+        for(int i=0;i<threadNum_;i++){
+            if(subLoop_[i]->hasConnection(connection)){
+                subLoop_[i]->closeConnection(connection);
+                break;
+            }
+        }
+
+    }
+}
+

@@ -241,7 +241,11 @@ void Connection::send(const char *data, size_t size)
     
 
         // 把这个函数 传给他 ，让 IO 线程 调用
+        // queueInLoop 方法的目的是将某个任务（在此处是 sendInLoop 函数的调用）放入事件循环线程（通常是 I/O 线程）的任务队列中。
         loop_->queueInLoop(
+            // std::bind   创建了一个新的可调用对象
+            // 通过使用 std::bind，你可以在一个线程中准备要在另一个线程中执行的操作。也就是说，sendInLoop 的实际执行会被延迟到 I/O 线程处理它的时候，而不是在工作线程中立刻执行。
+            // 参数确实是传递到了 I/O 线程的上下文中
             std::bind(&Connection::sendInLoop, this, data, size)
         );
     

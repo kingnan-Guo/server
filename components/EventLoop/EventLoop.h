@@ -106,6 +106,11 @@ class EventLoop
         // 设置 回调函数的 成员函数 // 将被设置为TcpServer::removeConnection()
         void setTimerCallBack(std::function<void(int)> cb);
 
+
+        // 关闭连接
+        void closeConnection(spConnection connection);
+        bool hasConnection(spConnection connection);
+
 };
 
 

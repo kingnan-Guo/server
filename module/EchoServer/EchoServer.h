@@ -45,6 +45,9 @@ class EchoServer
         void OnMessage(spConnection connection, std::string& message);     // 处理客户端的请求报文, 用于添加给线程池,在ThreadPool中回调此函数。
         // 客户端连接超时回调, 客户端连接超时的 时候 TcpServer类中回调此函数
         void HandleRemove(int fd);
+
+
+        void PreparationSend(spConnection connection, std::string& message); // 准备发送数据，在TcpServer类中回调此函数。
 };
 
 
