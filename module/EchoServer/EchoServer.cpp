@@ -57,7 +57,7 @@ void EchoServer::Start(){
  // 处理新客户端连接请求，在TcpServer类中回调此函数。
 void EchoServer::HandleNewConnection(spConnection connection){
     // std::cout << "New Connection Come in." << std::endl;
-    std::cout << "New Connection Come in. HandleNewConnection   thread id : " << syscall(SYS_gettid) << std::endl;
+    // std::cout << "New Connection Come in. HandleNewConnection   thread id : " << syscall(SYS_gettid) << std::endl;
 };
 
                 // 关闭客户端的连接，在TcpServer类中回调此函数。 
@@ -74,127 +74,166 @@ void EchoServer::HandleError(spConnection connection){
 void EchoServer::HandleMessage(spConnection connection, std::string& message){
 
 
-    std::cout << "HandleMessage   thread id : " << syscall(SYS_gettid) << " message :\n" << message << std::endl;
-    // 在这里，将经过若干步骤的运算。
-    // std::cout << "HandleMessage   data: " << message << std::endl;
-    // 将运算结果返回给客户端
+    // std::cout << "HandleMessage   thread id : " << syscall(SYS_gettid) << " message :\n" << message << std::endl;
+        // 在这里，将经过若干步骤的运算。
+        // std::cout << "HandleMessage   data: " << message << std::endl;
+        // 将运算结果返回给客户端
 
 
-    // / 自定义协议，报文格式为：报文长度（4字节）+报文内容。
-    // int len = message.size();                   // 计算回应报文的大小。
-    // std::string tmpbuf((char*)&len,4);  // 把报文头部填充到回应报文中。
-    // tmpbuf.append(message);             // 把报文内容填充到回应报文中。
-    // //send(connection->fd(),tmpbuf.data(),tmpbuf.size(),0);   // 把临时缓冲区中的数据直接send()出去。
-    // connection->send(tmpbuf.data(),tmpbuf.size());   // 把临时缓冲区中的数据直接send()出去。
+        // / 自定义协议，报文格式为：报文长度（4字节）+报文内容。
+        // int len = message.size();                   // 计算回应报文的大小。
+        // std::string tmpbuf((char*)&len,4);  // 把报文头部填充到回应报文中。
+        // tmpbuf.append(message);             // 把报文内容填充到回应报文中。
+        // //send(connection->fd(),tmpbuf.data(),tmpbuf.size(),0);   // 把临时缓冲区中的数据直接send()出去。
+        // connection->send(tmpbuf.data(),tmpbuf.size());   // 把临时缓冲区中的数据直接send()出去。
 
-    // connection->send(message.data(),message.size());
-
-
-    // 模拟请求
-    // HttpRequestPtr req = std::make_shared<HttpRequest>();
-    // HttpResponsePtr resp = std::make_shared<HttpResponse>();
-    // Router router;
-
-    // router.GetRoute(req, resp);
+        // connection->send(message.data(),message.size());
 
 
 
-    // router.POST("/echo", [](const HttpRequestPtr& req, const HttpResponsePtr& resp) {
-    //     resp->Write("Echo: " + req->body);
-    //     resp->Send();
-    // });
+
+
+
 
         Router router;
 
         router.GET("/hello", [this, &connection](const HttpRequestPtr& req, const HttpResponsePtr& resp) {
             // 先发送响应头，告诉客户端请求已收到，正在处理中
-            // 先发送响应头，告诉客户端请求已收到，正在处理中
+            // resp->SetHeader("Content-Type", "application/json");
+            // // resp->SetHeader("X-Status", "Processing");
+            // // 保证连接保持活跃
+            // // resp->SetHeader("Connection", "keep-alive");
+            // // 发送响应头（客户端接收到这个后可以开始处理）
+            // std::ostringstream initial_response;
+            // initial_response << "HTTP/1.1 " << resp->status_code << " " << resp->GetStatusMessage() << "\r\n";
+            // for (const auto& header : resp->headers) {
+            //     initial_response << header.first << ": " << header.second << "\r\n";
+            // }
+            // initial_response << "\r\n";  // 空行表示头部结束
+            // // 发送响应头（客户端接收到这个后可以开始处理）
+            // std::string responseStr = initial_response.str();
+            // std::cout << responseStr;
+
+            // PreparationSend(connection, responseStr);
+            // // std::this_thread::sleep_for(std::chrono::seconds(4));
+            // // sleep(4);
+            // std::string jsonResponse = R"({data: {info: "kingan"}})";
+            // PreparationSend(connection, jsonResponse);
 
 
-        resp->SetHeader("Content-Type", "application/json");
-        resp->SetHeader("X-Status", "Processing");
-        
-        // 保证连接保持活跃
-        resp->SetHeader("Connection", "keep-alive");
-
-        // 发送响应头（客户端接收到这个后可以开始处理）
-        std::ostringstream initial_response;
-        initial_response << "HTTP/1.1 " << resp->status_code << " " << resp->GetStatusMessage() << "\r\n";
-        for (const auto& header : resp->headers) {
-            initial_response << header.first << ": " << header.second << "\r\n";
-        }
-        initial_response << "\r\n";  // 空行表示头部结束
 
 
 
-
-        // 发送响应头（客户端接收到这个后可以开始处理）
-        std::string responseStr = initial_response.str();
-
-        std::cout << responseStr;
-  
-        // OnMessage(connection, responseStr);
-        PreparationSend(connection, responseStr);
-        // std::this_thread::sleep_for(std::chrono::seconds(4));
-        // sleep(4);
-
-        // 设置响应体（JSON 数据）
-        // std::string jsonResponse = "{\"message\":\"Data processed successfully!\"}";
-
-        std::string jsonResponse = R"({
-            "data": {
-                "info": {
-                    "message": "Data processed successfully!",
-                    "timestamp": "2023-10-01T12:00:00Z"
-                },
+            std::ostringstream response;
+            response << "HTTP/1.1 " << resp->status_code << " " << resp->GetStatusMessage() << "\r\n";
+            for (const auto& header : resp->headers) {
+                response << header.first << ": " << header.second << "\r\n";
             }
-        })";
+            response << "\r\n"; // 结束响应头
+
+            std::string responseStr = response.str();
+            PreparationSend(connection, responseStr);
+
+            // 然后发送数据
+            // std::string jsonResponse = "{\"message\":\"Hello, world!\"}";
+            // PreparationSend(connection, jsonResponse);
+
+
+            // 然后发送数据
+            std::string jsonResponse; // 初始化为空字符串
+            jsonResponse += "{\n";    // JSON 的起始大括号
+            for (const auto& param : req->queryParams) {
+                std::cout << "   " << param.first << ": " << param.second << std::endl;
+                // 拼接 JSON 格式字符串
+                jsonResponse += "  \"" + param.first + "\": \"" + param.second + "\",\n";
+            }
+            // 删除最后一个逗号并添加结束大括号
+            if (!req->queryParams.empty()) {
+                jsonResponse.pop_back(); // 删除最后一个逗号
+                jsonResponse.pop_back(); // 删除最后一个换行符
+            }
+            jsonResponse += "\n}";
+
+            // printf("JSON Response: %s\n", jsonResponse.c_str());
+            // 发送 JSON 数据
+            PreparationSend(connection, jsonResponse);
+
+
+        
+        });
+
+
+
+        router.POST("/api", [this, &connection](const HttpRequestPtr& req, const HttpResponsePtr& resp) {
+            // 先发送响应头，告诉客户端请求已收到，正在处理中
+            // resp->SetHeader("Content-Type", "application/json");
+            // resp->SetHeader("X-Status", "Processing");
+            // // 保证连接保持活跃
+            // // resp->SetHeader("Connection", "keep-alive");
+            // // 发送响应头（客户端接收到这个后可以开始处理）
+            // std::ostringstream initial_response;
+            // initial_response << "HTTP/1.1 " << resp->status_code << " " << resp->GetStatusMessage() << "\r\n";
+            // for (const auto& header : resp->headers) {
+            //     initial_response << header.first << ": " << header.second << "\r\n";
+            // }
+            // initial_response << "\r\n";  // 空行表示头部结束
+            // // 发送响应头（客户端接收到这个后可以开始处理）
+            // std::string responseStr = initial_response.str();
+            // std::cout << responseStr;
+
+            // PreparationSend(connection, responseStr);
+
+            // std::string jsonResponse = "123";
+
+            // PreparationSend(connection, jsonResponse);
+        
+
+
+            std::ostringstream response;
+            response << "HTTP/1.1 " << resp->status_code << " " << resp->GetStatusMessage() << "\r\n";
+            for (const auto& header : resp->headers) {
+                response << header.first << ": " << header.second << "\r\n";
+            }
+            response << "\r\n"; // 结束响应头
+
+            std::string responseStr = response.str();
+            PreparationSend(connection, responseStr);
+
+            std::string jsonResponse = "{\"message\":\"Hello, world!\"}";
+            PreparationSend(connection, jsonResponse);
+
+
+        });
+
+    
+
+
+
+
+        HttpRequest request;
+        HttpRequestPtr req = std::make_shared<HttpRequest>();
+        HttpResponsePtr resp = std::make_shared<HttpResponse>();
+        if (req->parse(message)) {
+            // req->printRequest();
+            router.GetRoute(req, resp);
+
+        } else {
+            std::cerr << "Failed to parse request." << std::endl;
+
+        }
+
+
+        // // 这里是将 收到的数据 又 发送回去，正常业务中 不是这样的，这里只是为了测试
+        // // 判断 工作线程池的大小
         // if(threadPool_.size() == 0){ // 没有工作线程，那么直接调用 IO 线程
-        //     OnMessage(connection, jsonResponse);
+        //     OnMessage(connection, message);
         // }
         // else{ // 有工作线程，那么把业务放到 线程池 的任务队列中
         //     // 把业务放到 线程池 的任务队列中
         //     threadPool_.addTask(
-        //         std::bind(&EchoServer::OnMessage, this, connection, jsonResponse)
+        //         std::bind(&EchoServer::OnMessage, this, connection, message)
         //     );
         // }
-        PreparationSend(connection, jsonResponse);
-        // 发送完数据 关闭连接
-        // sleep(2);
-
-        // connection->closeCallBack(); // 关闭连接
-        // tcpServer_.closeEventLoopConnection(connection);
-
-        
-    });
-
-
-
-
-    HttpRequest request;
-    HttpRequestPtr req = std::make_shared<HttpRequest>();
-    HttpResponsePtr resp = std::make_shared<HttpResponse>();
-    if (req->parse(message)) {
-        req->printRequest();
-        router.GetRoute(req, resp);
-
-    } else {
-        std::cerr << "Failed to parse request." << std::endl;
-
-    }
-
-
-    // // 这里是将 收到的数据 又 发送回去，正常业务中 不是这样的，这里只是为了测试
-    // // 判断 工作线程池的大小
-    // if(threadPool_.size() == 0){ // 没有工作线程，那么直接调用 IO 线程
-    //     OnMessage(connection, message);
-    // }
-    // else{ // 有工作线程，那么把业务放到 线程池 的任务队列中
-    //     // 把业务放到 线程池 的任务队列中
-    //     threadPool_.addTask(
-    //         std::bind(&EchoServer::OnMessage, this, connection, message)
-    //     );
-    // }
 
 };
 
@@ -251,7 +290,7 @@ void EchoServer::Stop(){
 
 
 void EchoServer::HandleRemove(int fd){
-    std::cout << "HandleRemove. fd ="<< fd << std::endl;
+    // std::cout << "HandleRemove. fd ="<< fd << std::endl;
     // 从 userMap_ 中删除 fd
     std::lock_guard<std::mutex> gd(userMapMutex_);
     userMap_.erase(fd);

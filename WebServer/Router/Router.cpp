@@ -30,8 +30,8 @@ HttpMethod Router::methodFromString(const std::string& method) {
 std::string Router::GetRoute(const HttpRequestPtr& req, const HttpResponsePtr& resp)  {
 
     //
-    printf("GetRoute method: %s\n", req->method.c_str());
-    printf("GetRoute path: %s\n", req->path.c_str());
+    // printf("GetRoute method: %s\n", req->method.c_str());
+    // printf("GetRoute path: %s\n", req->path.c_str());
 
     auto iter = pathHandlers_.find(req->path);
     if (iter != pathHandlers_.end()) {

@@ -177,7 +177,7 @@ void Connection::onMessage(){
                 if(inputBuffer_.pickMessage(message) == false){
                     break;
                 }
-                printf("recv( eventfd = %d ): %s\n", fd(), message.c_str());
+                // printf("recv( eventfd = %d ): %s\n", fd(), message.c_str());
 
                 // std::string message = inputBuffer_.data();
                 // printf("message (eventfd=%d):%s\n", fd(), message.data());
@@ -193,7 +193,7 @@ void Connection::onMessage(){
 
                 //这里已经接收到完整的 报文了 ，更新时间
                 lastTime_ = TimeStamp::Now();
-                std::cout << "lastTime_ = " << lastTime_.toString() << std::endl;
+                // std::cout << "lastTime_ = " << lastTime_.toString() << std::endl;
 
                 
             }
@@ -237,7 +237,7 @@ void Connection::send(const char *data, size_t size)
         sendInLoop(data, size);
     } else{
         // 如果 当前线程不是 IO 线程， 把发送的 数据 的 操作 交给 IO 线程 去执行
-        printf(" 当前线程不是 IO 线程， 把发送的 数据 的 操作 交给 IO 线程 去执行 \n");
+        // printf(" 当前线程不是 IO 线程， 把发送的 数据 的 操作 交给 IO 线程 去执行 \n");
     
 
         // 把这个函数 传给他 ，让 IO 线程 调用
@@ -251,7 +251,7 @@ void Connection::send(const char *data, size_t size)
     
     }
 
-    printf("Connection::send thread is ( 可能 在 工作 进程里 也可能是 IO 线程)= %d\n", syscall(SYS_gettid));
+    // printf("Connection::send thread is ( 可能 在 工作 进程里 也可能是 IO 线程)= %d\n", syscall(SYS_gettid));
 
 
 }
@@ -270,14 +270,14 @@ void Connection::sendInLoop(const char *data,size_t size){
 
 // 处理写事件的 回调函数， 供 channel 回调
 void Connection::writeCallBack(){
-    printf("writeCallBack 333\n");
+    // printf("writeCallBack 333\n");
     // 把缓存区中的数据发送出去
     int writen = ::send(fd(), outputBuffer_.data(), outputBuffer_.size(), 0);
     if(writen > 0){
         outputBuffer_.erase(0, writen); // 从缓存区中删除已发送的数据。
 
     }
-    printf("Connection::writeCallBack thread is (在 IO 进程里) = %d\n", syscall(SYS_gettid));
+    // printf("Connection::writeCallBack thread is (在 IO 进程里) = %d\n", syscall(SYS_gettid));
 
     if(outputBuffer_.size() == 0){
         // 如果缓存区为空，则关闭写事件

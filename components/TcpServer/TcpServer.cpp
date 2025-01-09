@@ -216,7 +216,7 @@ void TcpServer::newConnection(std::unique_ptr<Socket> clinetSocket){
     subLoop_[connection->fd() % threadNum_]->newConnection(connection);
 
 
-    printf("TcpServer::newConnection() thread is %d.\n",syscall(SYS_gettid)); 
+    // printf("TcpServer::newConnection() thread is %d.\n",syscall(SYS_gettid)); 
 
     // 回调 newConnectionCallBack_
     if (newConnectionCallBack_){
@@ -288,7 +288,7 @@ void TcpServer::onMessage(spConnection connection, std::string& message){
 }
 
 void TcpServer::sendCompletionCallback(spConnection connection){
-    printf("send completion callback.\n");
+    // printf("send completion callback.\n");
     if (sendCompleteCallBack_)
     {
         sendCompleteCallBack_(connection);

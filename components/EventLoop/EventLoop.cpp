@@ -73,7 +73,7 @@ Epoll* EventLoop::ep()
 // 循环
 void EventLoop::run(){
 
-    printf("EventLoop::run() start : 线程id thread id  = %d \n", syscall(SYS_gettid));
+    // printf("EventLoop::run() start : 线程id thread id  = %d \n", syscall(SYS_gettid));
 
     threadId_ = syscall(SYS_gettid);// 获取 事件循环 所在 线程id
 
@@ -176,7 +176,7 @@ void EventLoop::wakeup(){
 
 // 增加一个 事件 循环 线程 被eventfd 唤醒 ， 被唤醒后 执行的 函数
 void EventLoop::handleWakeUp(){
-    printf("EventLoop::handleWakeUp()    线程id thread id  = %d \n", syscall(SYS_gettid));
+    // printf("EventLoop::handleWakeUp()    线程id thread id  = %d \n", syscall(SYS_gettid));
 
     // 把 eventfd 中的数据 读出来
     uint64_t val = 0;
@@ -259,7 +259,7 @@ void EventLoop::newConnection(spConnection connection){
 
 // 关闭连接; 删除 Connection 到  ConnectionMap_ 中的函数
 void EventLoop::closeConnection(spConnection connection){
-    printf("EventLoop::closeConnection()    关闭 与 客户端的 连接  connection ->fd  = %d\n", connection->fd());
+    // printf("EventLoop::closeConnection()    关闭 与 客户端的 连接  connection ->fd  = %d\n", connection->fd());
     {
         std::lock_guard<std::mutex> gd(connectionsMapMutex_);// 加锁
         // 超时 从容器中删除 connection

@@ -40,7 +40,7 @@ ThreadPool::ThreadPool(size_t threadNum, const std::string& threadType):stop_(fa
 
                 } /// 锁作用域的结束。
 
-                printf("%s execute task  %d \n", threadType_.c_str() ,syscall(SYS_gettid));
+                // printf("%s execute task  %d \n", threadType_.c_str() ,syscall(SYS_gettid));
                 // 执行出队的任务
                 task();
 

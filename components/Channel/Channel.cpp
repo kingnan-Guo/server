@@ -141,7 +141,7 @@ void Channel::handleEvent(){
 
         else if (revents_ & EPOLLOUT) // 有数据需要写，暂时没有代码，以后再说。
         {
-            printf("handleEvent EPOLLOUT \n");
+            // printf("handleEvent EPOLLOUT \n");
             writeCallback_(); // 调 用回调函数 ， connection 类中定义的回调函数
 
         }
