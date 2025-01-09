@@ -134,31 +134,31 @@ void EchoServer::HandleMessage(spConnection connection, std::string& message){
         std::cout << responseStr;
   
         OnMessage(connection, responseStr);
-        // std::this_thread::sleep_for(std::chrono::seconds(2));
+        std::this_thread::sleep_for(std::chrono::seconds(2));
         
 
 
 
         // 设置响应体（JSON 数据）
         std::string jsonResponse = "{\"message\":\"Data processed successfully!\"}";
-        resp->String(jsonResponse);  // 设置响应体内容
-        resp->SetHeader("Content-Type", "application/json");
-        // 发送响应头和响应体
-        std::ostringstream final_response;
-        final_response << "HTTP/1.1 " << resp->status_code << " " << resp->GetStatusMessage() << "\r\n";
-        for (const auto& header : resp->headers) {
-            final_response << header.first << ": " << header.second << "\r\n";
-        }
-        final_response << "\r\n";  // 空行表示头部结束
-        final_response << resp->body;  // 响应体内容
+        // resp->String(jsonResponse);  // 设置响应体内容
+        // resp->SetHeader("Content-Type", "application/json");
+        // // 发送响应头和响应体
+        // std::ostringstream final_response;
+        // final_response << "HTTP/1.1 " << resp->status_code << " " << resp->GetStatusMessage() << "\r\n";
+        // for (const auto& header : resp->headers) {
+        //     final_response << header.first << ": " << header.second << "\r\n";
+        // }
+        // final_response << "\r\n";  // 空行表示头部结束
+        // final_response << resp->body;  // 响应体内容
 
 
 
 
 
 
-        std::string finalsesponse = final_response.str();
-        OnMessage(connection, finalsesponse);
+        // std::string finalsesponse = final_response.str();
+        OnMessage(connection, jsonResponse);
 
 
 
